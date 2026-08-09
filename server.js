@@ -2,12 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const path = require('path'); // Added for Vercel frontend routing
 require('dotenv').config();
 const db = require('./db');
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:4200' }));
+// Updated CORS to allow requests in production on Vercel
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -375,6 +377,24 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// ==========================================
+// VERCEL ANGULAR FRONTEND SERVING
+// ==========================================
+// Adjust this path if your build folder differs (e.g., just 'esports-frontend/dist')
+const frontendPath = path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser');
+app.use(express.static(frontendPath));
+
+// Catch-all route to serve the Angular index.html file for any unknown paths
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
+
+// Start the server natively (useful for local testing)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+// EXPORT APP FOR VERCEL SERVERLESS FUNCTIONS
+module.exports = app;
