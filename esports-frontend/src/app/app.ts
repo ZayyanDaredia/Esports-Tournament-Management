@@ -68,7 +68,7 @@ export class App implements OnInit {
   }
 
   login(user: string, pass: string) {
-    this.http.post('http://localhost:3000/api/login', { username: user, password: pass }).subscribe({
+    this.http.post('/api/login', { username: user, password: pass }).subscribe({
       next: (res: any) => {
         this.userRole = res.role;
         this.username = res.username;
@@ -86,7 +86,7 @@ export class App implements OnInit {
   }
 
   signup(user: string, pass: string) {
-    this.http.post('http://localhost:3000/api/signup', { username: user, password: pass }).subscribe({
+    this.http.post('/api/signup', { username: user, password: pass }).subscribe({
       next: () => {
         this.authMode = 'login';
         this.cdr.detectChanges();
@@ -111,7 +111,7 @@ export class App implements OnInit {
   }
 
   fetchTeams() {
-    this.http.get<any[]>('http://localhost:3000/api/teams').subscribe({
+    this.http.get<any[]>('/api/teams').subscribe({
       next: (data) => { 
         this.teams = data as any[]; 
         if (this.activeTournament) {
@@ -124,7 +124,7 @@ export class App implements OnInit {
   }
 
   fetchTournaments() {
-    this.http.get<any[]>('http://localhost:3000/api/tournaments').subscribe({
+    this.http.get<any[]>('/api/tournaments').subscribe({
       next: (data) => { 
         this.tournaments = data as any[]; 
         this.updateVisibleTournaments();
@@ -162,7 +162,7 @@ export class App implements OnInit {
     this.activeTournament = tourney;
     this.filteredTeams = this.teams.filter(t => t.tournament_id === tourney.tournament_id);
     
-    this.http.get<any[]>(`http://localhost:3000/api/tournaments/${tourney.tournament_id}/matches`).subscribe({
+    this.http.get<any[]>(`/api/tournaments/${tourney.tournament_id}/matches`).subscribe({
       next: (data) => { 
         this.matches = (data as any[]).map(m => ({
           ...m,
@@ -206,7 +206,7 @@ export class App implements OnInit {
   }
 
   createTournament(name: string, game: string) {
-    this.http.post('http://localhost:3000/api/tournaments', { name, game_title: game }, this.getAuthHeaders()).subscribe({
+    this.http.post('/api/tournaments', { name, game_title: game }, this.getAuthHeaders()).subscribe({
       next: () => { this.fetchTournaments(); },
       error: (err) => alert(err.error.error || 'Failed')
     });
@@ -214,7 +214,7 @@ export class App implements OnInit {
 
   generateBracket() {
     if (!this.activeTournament) return;
-    this.http.post(`http://localhost:3000/api/tournaments/${this.activeTournament.tournament_id}/generate-bracket`, {}, this.getAuthHeaders()).subscribe({
+    this.http.post(`/api/tournaments/${this.activeTournament.tournament_id}/generate-bracket`, {}, this.getAuthHeaders()).subscribe({
       next: () => { 
         this.selectTournament(this.activeTournament); 
         this.fetchTournaments();
@@ -226,7 +226,7 @@ export class App implements OnInit {
   resetBracket() {
     if (!this.activeTournament) return;
     if (confirm('Are you sure you want to reset the bracket?')) {
-      this.http.delete(`http://localhost:3000/api/tournaments/${this.activeTournament.tournament_id}/bracket`, this.getAuthHeaders()).subscribe({
+      this.http.delete(`/api/tournaments/${this.activeTournament.tournament_id}/bracket`, this.getAuthHeaders()).subscribe({
         next: () => {
           this.selectTournament(this.activeTournament);
           this.fetchTournaments();
@@ -240,7 +240,7 @@ export class App implements OnInit {
     const a = parseInt(scoreA), b = parseInt(scoreB);
     if (isNaN(a) || isNaN(b)) return;
     
-    this.http.put(`http://localhost:3000/api/matches/${matchId}`, { score_a: a, score_b: b, winner_id: a > b ? teamAId : teamBId }, this.getAuthHeaders()).subscribe({
+    this.http.put(`/api/matches/${matchId}`, { score_a: a, score_b: b, winner_id: a > b ? teamAId : teamBId }, this.getAuthHeaders()).subscribe({
       next: () => {
         this.selectTournament(this.activeTournament);
         this.fetchTournaments();
@@ -251,7 +251,7 @@ export class App implements OnInit {
 
   deleteTeam(id: number) {
     if (confirm('Delete this team?')) {
-      this.http.delete(`http://localhost:3000/api/teams/${id}`, this.getAuthHeaders()).subscribe({
+      this.http.delete(`/api/teams/${id}`, this.getAuthHeaders()).subscribe({
         next: () => this.fetchTeams(),
         error: (err) => alert(err.error.error || 'Failed')
       });
@@ -260,7 +260,7 @@ export class App implements OnInit {
 
   deleteTournament(id: number) {
     if (confirm('Delete this tournament?')) {
-      this.http.delete(`http://localhost:3000/api/tournaments/${id}`, this.getAuthHeaders()).subscribe({
+      this.http.delete(`/api/tournaments/${id}`, this.getAuthHeaders()).subscribe({
         next: () => {
           this.activeTournament = null;
           this.matches = [];
@@ -289,7 +289,7 @@ export class App implements OnInit {
       subs: [this.regSub1, this.regSub2].filter(s => s && s.trim() !== '').map(s => s.trim())
     };
 
-    this.http.post('http://localhost:3000/api/teams/bulk', payload, this.getAuthHeaders()).subscribe({
+    this.http.post('/api/teams/bulk', payload, this.getAuthHeaders()).subscribe({
       next: () => { 
         this.submittedAttempt = false; 
         this.regTourneyId = '';
@@ -309,7 +309,7 @@ export class App implements OnInit {
   }
 
   openTeamModal(teamId: number) {
-    this.http.get<any>(`http://localhost:3000/api/teams/${teamId}/roster`).subscribe({
+    this.http.get<any>(`/api/teams/${teamId}/roster`).subscribe({
       next: (data) => {
         this.selectedTeamRoster = data;
         this.cdr.detectChanges();
