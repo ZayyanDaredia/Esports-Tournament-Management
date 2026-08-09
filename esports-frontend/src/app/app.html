@@ -1,344 +1,310 @@
-<main style="max-width: 1400px; margin: 0 auto; padding: 2.5rem 1.5rem; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0b131d; color: #f0f4f8; min-height: 100vh;">
-  
-  <!-- 1. ESPORTS HUB BAR -->
-  <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; background: #131b26; padding: 1.2rem 1.8rem; border-radius: 12px; border: 1px solid #1f2d3d; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <span style="font-size: 1.8rem;">⚡</span>
-      <h1 style="color: #ff4655; margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 0.5px;">ESPORTS HUB</h1>
-    </div>
-    <div>
-      @if (userRole) {
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <span style="color: #94a3b8; font-size: 0.9rem;">Logged in as: <strong style="color: #ffffff; background: #1e293b; padding: 4px 10px; border-radius: 6px; border: 1px solid #334155;">{{ username }} ({{ userRole | uppercase }})</strong></span>
-          <button (click)="logout()" style="background: #27272a; color: #f87171; border: 1px solid #3f3f46; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem;">Logout</button>
-        </div>
-      } @else {
-        <span style="color: #64748b; font-size: 0.9rem; font-style: italic;">Public Visitor Mode</span>
-      }
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; color: #f0f0f0; background: #121212; min-height: 100vh;">
+
+  <!-- ========================================== -->
+  <!-- HEADER & AUTHENTICATION BAR -->
+  <!-- ========================================== -->
+  <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+    <h1>🏆 Esports Tournament Platform</h1>
+    
+    <div *ngIf="userRole">
+      <span>Welcome, <strong>{{ username }}</strong> ({{ userRole | uppercase }})</span>
+      <button (click)="logout()" style="margin-left: 15px; background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Logout</button>
     </div>
   </header>
 
-  <!-- AUTHENTICATION (If not logged in) -->
-  @if (!userRole) {
-    <section style="max-width: 420px; margin: 3rem auto; background: #131b26; padding: 2.2rem; border-radius: 12px; border: 1px solid #1f2d3d;">
-      <div style="display: flex; background: #0b131d; padding: 4px; border-radius: 8px; margin-bottom: 1.8rem; border: 1px solid #1f2d3d;">
-        <button (click)="authMode = 'login'" style="flex: 1; background: {{ authMode === 'login' ? '#ff4655' : 'transparent' }}; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 700;">Sign In</button>
-        <button (click)="authMode = 'signup'" style="flex: 1; background: {{ authMode === 'signup' ? '#ff4655' : 'transparent' }}; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 700;">Register Account</button>
+  <!-- ========================================== -->
+  <!-- LOGIN / SIGNUP VIEW (If Not Logged In) -->
+  <!-- ========================================== -->
+  <div *ngIf="!userRole" style="max-width: 400px; margin: 50px auto; background: #1e1e1e; padding: 30px; border-radius: 8px; border: 1px solid #333;">
+    <h2 style="text-align: center; margin-bottom: 20px;">{{ authMode === 'login' ? 'Login' : 'Sign Up' }}</h2>
+    
+    <form (submit)="$event.preventDefault()">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px;">Username</label>
+        <input type="text" #userInput style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
       </div>
 
-      @if (authMode === 'login') {
-        <h2 style="text-align: center; margin-top: 0; margin-bottom: 1.5rem; color: #f8fafc; font-size: 1.3rem;">Welcome Back</h2>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <input #loginUser placeholder="Username" style="width: 100%; padding: 12px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px; box-sizing: border-box;">
-          <input #loginPass type="password" placeholder="Password" style="width: 100%; padding: 12px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px; box-sizing: border-box;">
-          <button (click)="login(loginUser.value, loginPass.value)" style="width: 100%; background: #ff4655; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Login to Hub</button>
-        </div>
-      } @else {
-        <h2 style="text-align: center; margin-top: 0; margin-bottom: 1.5rem; color: #f8fafc; font-size: 1.3rem;">Create Competitor Account</h2>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <input #signUser placeholder="Choose Username" style="width: 100%; padding: 12px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px; box-sizing: border-box;">
-          <input #signPass type="password" placeholder="Choose Password" style="width: 100%; padding: 12px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px; box-sizing: border-box;">
-          <button (click)="signup(signUser.value, signPass.value)" style="width: 100%; background: #50e3c2; color: #0b131d; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Create Account</button>
-        </div>
-      }
-    </section>
-  }
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 5px;">Password</label>
+        <input type="password" #passInput style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+      </div>
 
-  @if (userRole) {
-    <!-- 2. LAUNCH TOURNAMENT / REGISTER ROSTER SECTION -->
-    @if (userRole === 'admin') {
-      <section style="background: #131b26; padding: 1.8rem; border: 1px solid rgba(255, 70, 85, 0.3); border-radius: 12px; margin-bottom: 2.5rem;">
-        <h2 style="margin-top: 0; color: #ff4655; font-size: 1.15rem; font-weight: 700;">🛠️ Admin Control Panel: Launch Tournament</h2>
-        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 1rem;">
-          <input #tourneyName placeholder="Tournament Name" style="flex: 1; min-width: 240px; padding: 12px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px; box-sizing: border-box;">
-          <select #gameSelect style="padding: 12px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px;">
-            <option value="Valorant">Valorant</option>
-            <option value="CS2">CS2</option>
-          </select>
-          <button (click)="createTournament(tourneyName.value, gameSelect.value)" style="background: #50e3c2; color: #0b131d; padding: 12px 22px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Launch Tournament</button>
-        </div>
-      </section>
-    }
+      <button *ngIf="authMode === 'login'" (click)="login(userInput.value, passInput.value)" style="width: 100%; background: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">Login</button>
+      <button *ngIf="authMode === 'signup'" (click)="signup(userInput.value, passInput.value)" style="width: 100%; background: #28a745; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">Register Account</button>
+    </form>
 
-    <!-- REGISTER TEAM ROSTER (10-Step Ordered Layout with NgModel Binding) -->
-    @if (userRole === 'public') {
-      <section style="background: #131b26; padding: 2rem; border: 1px solid #1f2d3d; border-radius: 14px; margin-bottom: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-        <h2 style="margin-top: 0; color: #50e3c2; font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
-          <span>📝</span> Register Team Roster
-        </h2>
+    <p style="text-align: center; margin-top: 15px; font-size: 14px;">
+      <span *ngIf="authMode === 'login'">Don't have an account? <a (click)="authMode = 'signup'" style="color: #4dabf7; cursor: pointer;">Sign up</a></span>
+      <span *ngIf="authMode === 'signup'">Already have an account? <a (click)="authMode = 'login'" style="color: #4dabf7; cursor: pointer;">Login</a></span>
+    </p>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MAIN DASHBOARD (If Logged In) -->
+  <!-- ========================================== -->
+  <div *ngIf="userRole">
+
+    <!-- NAVIGATION TABS / BACK BUTTON -->
+    <div style="margin-bottom: 20px;">
+      <button *ngIf="activeTournament" (click)="activeTournament = null; isManualBracketMode = false;" style="background: #444; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+        ← Back to All Tournaments
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW A: TOURNAMENTS LIST & HUB -->
+    <!-- ========================================== -->
+    <div *ngIf="!activeTournament">
+      
+      <!-- Admin Create Tournament Box -->
+      <div *ngIf="userRole === 'admin'" style="background: #1e1e1e; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333;">
+        <h3>➕ Create New Tournament</h3>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="text" placeholder="Tournament Name" #newTourneyName style="flex: 2; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          <input type="text" placeholder="Game Title (e.g. Valorant)" #newTourneyGame style="flex: 1; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          <button (click)="createTournament(newTourneyName.value, newTourneyGame.value); newTourneyName.value='';" style="background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Create</button>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #1a1a1a; padding: 15px; border-radius: 8px;">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="🔍 Search tournaments..." style="flex: 2; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
         
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          
-          <!-- 1. Tournament Selector -->
+        <select [(ngModel)]="selectedGame" style="flex: 1; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          <option value="ALL">All Games</option>
+          <option value="Valorant">Valorant</option>
+          <option value="CS2">CS2</option>
+          <option value="Dota 2">Dota 2</option>
+        </select>
+
+        <select [(ngModel)]="selectedStatus" style="flex: 1; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          <option value="ALL">All Statuses</option>
+          <option value="REGISTRATION_OPEN">Registration Open</option>
+          <option value="ONGOING">Ongoing</option>
+          <option value="COMPLETED">Completed</option>
+        </select>
+      </div>
+
+      <!-- Tournaments Grid -->
+      <h2>Active Tournaments & Hubs</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+        <div *ngFor="let t of filteredTournaments" style="background: #1e1e1e; border: 1px solid #333; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
-            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tournament <span style="color: #ff4655;">*</span></label>
-            <select [(ngModel)]="regTourneyId" [style.border]="(submittedAttempt && !regTourneyId) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; padding: 12px 14px; background: #0b131d; color: #f1f5f9; border-radius: 8px; font-size: 0.95rem; outline: none; box-sizing: border-box;">
-              <option value="" disabled selected style="color: #64748b;">Choose Tournament To Take Part In</option>
-              @for (t of tournaments; track t.tournament_id) {
-                @if (t.status === 'REGISTRATION_OPEN') {
-                  <option [value]="t.tournament_id" style="color: #f1f5f9;">{{ t.name }} ({{ t.game_title }})</option>
-                }
-              }
+            <span style="font-size: 12px; background: #333; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">{{ t.game_title }}</span>
+            <h3 style="margin: 10px 0 5px 0;">{{ t.name }}</h3>
+            <p style="font-size: 13px; color: #aaa; margin-bottom: 15px;">Status: <strong style="color: #4dabf7;">{{ t.status }}</strong></p>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button (click)="selectTournament(t)" style="flex: 2; background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;">View Hub & Bracket</button>
+            <button *ngIf="userRole === 'admin'" (click)="deleteTournament(t.tournament_id)" style="flex: 1; background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer;">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- TEAM REGISTRATION FORM (For Public Users) -->
+      <!-- ========================================== -->
+      <div style="background: #1e1e1e; padding: 25px; border-radius: 8px; margin-top: 40px; border: 1px solid #333;">
+        <h3>📝 Register Your Team for a Tournament</h3>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Fill out your team roster below. (Requires 1 Captain + 4 Members minimum)</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; margin-bottom: 5px;">Select Tournament</label>
+            <select [(ngModel)]="regTourneyId" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+              <option value="">-- Choose Tournament --</option>
+              <option *ngFor="let t of tournaments" [value]="t.tournament_id">{{ t.name }} ({{ t.game_title }})</option>
             </select>
           </div>
-
-          <!-- 2. Team Name Box -->
           <div>
-            <label style="display: block; font-size: 0.8rem; color: #94a3b8; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Team Name <span style="color: #ff4655;">*</span></label>
-            <input [(ngModel)]="regTeamName" placeholder="Team Name" [style.border]="(submittedAttempt && (!regTeamName || !regTeamName.trim())) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; padding: 12px 14px; background: #0b131d; color: white; border-radius: 8px; font-size: 0.95rem; outline: none; box-sizing: border-box;">
+            <label style="display: block; margin-bottom: 5px;">Team Name</label>
+            <input type="text" [(ngModel)]="regTeamName" placeholder="Enter Team Name" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
           </div>
-
-          <!-- Lineup Section Header with Red Star -->
-          <div style="border-top: 1px solid #1f2d3d; padding-top: 14px; margin-top: 4px;">
-            <span style="font-size: 0.85rem; color: #50e3c2; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Main Squad Lineup <span style="color: #ff4655;">*</span></span>
-          </div>
-
-          <!-- Grid for Players 1 to 5 -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;">
-            <!-- 3. Player 1 box -->
-            <div>
-              <input [(ngModel)]="regCap" placeholder="Player 1 - Captain" [style.border]="(submittedAttempt && (!regCap || !regCap.trim())) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; background: #0b131d; color: #50e3c2; border-radius: 8px; padding: 11px 13px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-            <!-- 4. Player 2 box -->
-            <div>
-              <input [(ngModel)]="regP2" placeholder="Player 2" [style.border]="(submittedAttempt && (!regP2 || !regP2.trim())) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; background: #0b131d; color: white; border-radius: 8px; padding: 11px 13px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-            <!-- 5. Player 3 box -->
-            <div>
-              <input [(ngModel)]="regP3" placeholder="Player 3" [style.border]="(submittedAttempt && (!regP3 || !regP3.trim())) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; background: #0b131d; color: white; border-radius: 8px; padding: 11px 13px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-            <!-- 6. Player 4 box -->
-            <div>
-              <input [(ngModel)]="regP4" placeholder="Player 4" [style.border]="(submittedAttempt && (!regP4 || !regP4.trim())) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; background: #0b131d; color: white; border-radius: 8px; padding: 11px 13px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-            <!-- 7. Player 5 box -->
-            <div>
-              <input [(ngModel)]="regP5" placeholder="Player 5" [style.border]="(submittedAttempt && (!regP5 || !regP5.trim())) ? '2px solid #ff4655' : '1px solid #334155'" style="width: 100%; background: #0b131d; color: white; border-radius: 8px; padding: 11px 13px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-          </div>
-
-          <!-- Substitutes Section Header -->
-          <div style="border-top: 1px solid #1f2d3d; padding-top: 14px; margin-top: 4px;">
-            <span style="font-size: 0.85rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Substitutes (Optional)</span>
-          </div>
-
-          <!-- Substitutes Grid -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <!-- 8. Substitute 1 box -->
-            <div>
-              <input [(ngModel)]="regSub1" placeholder="Substitute 1" style="width: 100%; background: #0b131d; color: #94a3b8; border: 1px dashed #334155; padding: 11px 13px; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-            <!-- 9. Substitute 2 box -->
-            <div>
-              <input [(ngModel)]="regSub2" placeholder="Substitute 2" style="width: 100%; background: #0b131d; color: #94a3b8; border: 1px dashed #334155; padding: 11px 13px; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
-            </div>
-          </div>
-
-          <!-- Inline Validation Error Warning -->
-          @if (submittedAttempt && (!regTourneyId || !regTeamName || !regTeamName.trim() || !regCap || !regCap.trim() || !regP2 || !regP2.trim() || !regP3 || !regP3.trim() || !regP4 || !regP4.trim() || !regP5 || !regP5.trim())) {
-            <div style="background: rgba(255, 70, 85, 0.15); border: 1px solid #ff4655; color: #ff4655; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-align: center;">
-              ⚠️ Please fill out all required fields marked with * highlighted in red above.
-            </div>
-          }
-
-          <!-- 10. Submit Roster Button -->
-          <div style="margin-top: 4px;">
-            <button (click)="registerFullTeam()" style="width: 100%; background: linear-gradient(135deg, #ff4655, #e03e4d); color: white; border: none; padding: 14px; font-weight: 800; font-size: 1rem; cursor: pointer; border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(255, 70, 85, 0.3);">Submit Roster</button>
-          </div>
-
-        </div>
-      </section>
-    }
-
-    <!-- 3. ACTIVE TOURNAMENTS & HUBS SECTION -->
-    <section style="margin-bottom: 3rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.2rem;">
-        <h2 style="color: #f8fafc; font-size: 1.25rem; font-weight: 700; margin: 0;">Active Tournaments & Hubs</h2>
-        
-        @if (userRole === 'public') {
-          <div style="display: flex; background: #131b26; padding: 4px; border-radius: 8px; border: 1px solid #1f2d3d;">
-            <button (click)="tournamentView = 'all'" style="background: {{ tournamentView === 'all' ? '#50e3c2' : 'transparent' }}; color: {{ tournamentView === 'all' ? '#0b131d' : '#94a3b8' }}; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">All Tournaments</button>
-            <button (click)="tournamentView = 'my'" style="background: {{ tournamentView === 'my' ? '#50e3c2' : 'transparent' }}; color: {{ tournamentView === 'my' ? '#0b131d' : '#94a3b8' }}; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.85rem;">My Tournaments Tracker</button>
-          </div>
-        }
-      </div>
-
-      <!-- Search and Filter Bar -->
-      <div style="background: #131b26; padding: 1.2rem; border-radius: 12px; border: 1px solid #1f2d3d; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 1.5rem;">
-        <div style="flex: 1; min-width: 220px;">
-          <input [(ngModel)]="searchQuery" placeholder="🔍 Search tournaments by name..." style="width: 100%; padding: 10px 14px; background: #0b131d; color: white; border: 1px solid #334155; border-radius: 8px; font-size: 0.9rem; outline: none; box-sizing: border-box;">
         </div>
 
-        <div style="display: flex; gap: 6px;">
-          <button (click)="selectedGame = 'ALL'" style="background: {{ selectedGame === 'ALL' ? '#334155' : '#0b131d' }}; color: {{ selectedGame === 'ALL' ? '#ffffff' : '#94a3b8' }}; border: 1px solid #334155; padding: 9px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">All Games</button>
-          <button (click)="selectedGame = 'Valorant'" style="background: {{ selectedGame === 'Valorant' ? '#ff4655' : '#0b131d' }}; color: {{ selectedGame === 'Valorant' ? '#ffffff' : '#94a3b8' }}; border: 1px solid #334155; padding: 9px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">Valorant</button>
-          <button (click)="selectedGame = 'CS2'" style="background: {{ selectedGame === 'CS2' ? '#f5a623' : '#0b131d' }}; color: {{ selectedGame === 'CS2' ? '#0b131d' : '#94a3b8' }}; border: 1px solid #334155; padding: 9px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">CS2</button>
-        </div>
-
-        <div>
-          <select [(ngModel)]="selectedStatus" style="padding: 10px 14px; background: #0b131d; color: #f1f5f9; border: 1px solid #334155; border-radius: 8px; font-size: 0.9rem; outline: none; cursor: pointer;">
-            <option value="ALL">All Statuses</option>
-            <option value="REGISTRATION_OPEN">Registration Open</option>
-            <option value="ONGOING">Ongoing</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Tournament Cards Grid -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem;">
-        @for (t of filteredTournaments; track t.tournament_id) {
-          <div (click)="selectTournament(t)" style="cursor: pointer; background: #131b26; padding: 1.4rem; border-radius: 10px; border: 2px solid {{ activeTournament?.tournament_id === t.tournament_id ? '#50e3c2' : '#1f2d3d' }}; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; background: {{ t.status === 'ONGOING' ? 'rgba(245, 166, 35, 0.15)' : (t.status === 'COMPLETED' ? 'rgba(148, 163, 184, 0.15)' : 'rgba(80, 227, 194, 0.15)') }}; color: {{ t.status === 'ONGOING' ? '#f5a623' : (t.status === 'COMPLETED' ? '#94a3b8' : '#50e3c2') }}; font-weight: 700; border: 1px solid {{ t.status === 'ONGOING' ? '#f5a623' : (t.status === 'COMPLETED' ? '#475569' : '#50e3c2') }};">
-                {{ t.status || 'REGISTRATION_OPEN' }}
-              </span>
-              <span style="font-size: 0.8rem; color: #64748b;">#{{ t.tournament_id }}</span>
-            </div>
-            <h3 style="margin: 0 0 5px 0; color: #f1f5f9; font-size: 1.15rem; font-weight: 700;">{{ t.name }}</h3>
-            <p style="color: {{ t.game_title === 'CS2' ? '#f5a623' : '#ff4655' }}; margin: 0; font-weight: 600; font-size: 0.9rem;">🎮 {{ t.game_title }}</p>
-          </div>
-        }
-        @empty {
-          <div style="grid-column: 1 / -1; background: #131b26; padding: 2.5rem; border-radius: 10px; text-align: center; border: 1px dashed #334155; color: #64748b;">
-            <p style="margin: 0; font-size: 1rem; font-weight: 600;">No tournaments match your filter criteria.</p>
-          </div>
-        }
-      </div>
-    </section>
-
-    <!-- 4. TOURNAMENT BRACKET & REGISTERED TEAMS OF THE SELECTED TOURNAMENT -->
-    @if (activeTournament) {
-      <section style="background: #131b26; padding: 2.5rem; border-radius: 14px; border: 1px solid #1f2d3d; margin-bottom: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.2rem; margin-bottom: 2.5rem; border-bottom: 1px solid #1f2d3d; padding-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
           <div>
-            <span style="font-size: 0.75rem; color: #50e3c2; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Tournament Brackets (Single Elimination)</span>
-            <h2 style="margin: 6px 0 0 0; color: #f8fafc; font-size: 1.8rem; font-weight: 800;">{{ activeTournament.name }}</h2>
+            <label style="display: block; margin-bottom: 5px;">Team Captain IGN</label>
+            <input type="text" [(ngModel)]="regCap" placeholder="Captain Riot ID" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
           </div>
-
-          @if (userRole === 'admin') {
-            <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
-              <button (click)="generateBracket()" style="background: #1e293b; color: #f8fafc; border: 1px solid #334155; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600;">Generate Bracket</button>
-              <button (click)="resetBracket()" style="background: rgba(245, 166, 35, 0.15); color: #f5a623; border: 1px solid #f5a623; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 700;">Reset Bracket</button>
-              <button (click)="deleteTournament(activeTournament.tournament_id)" style="background: rgba(255, 70, 85, 0.15); color: #ff4655; border: 1px solid #ff4655; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 700;">Delete Tourney</button>
-            </div>
-          }
+          <div>
+            <label style="display: block; margin-bottom: 5px;">Player 2 IGN</label>
+            <input type="text" [(ngModel)]="regP2" placeholder="Member 2 IGN" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px;">Player 3 IGN</label>
+            <input type="text" [(ngModel)]="regP3" placeholder="Member 3 IGN" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px;">Player 4 IGN</label>
+            <input type="text" [(ngModel)]="regP4" placeholder="Member 4 IGN" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px;">Player 5 IGN</label>
+            <input type="text" [(ngModel)]="regP5" placeholder="Member 5 IGN" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px;">Substitute 1 (Optional)</label>
+            <input type="text" [(ngModel)]="regSub1" placeholder="Sub 1 IGN" style="width: 100%; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px;">
+          </div>
         </div>
 
-        <!-- PROFESSIONAL SINGLE ELIMINATION HORIZONTAL TREE ARENA -->
-        @if (rounds.length > 0) {
-          <div style="background: #0d1520; border: 1px solid #1f2d3d; border-radius: 12px; padding: 2.5rem 1.5rem; overflow-x: auto; margin-bottom: 2.5rem;">
-            <div style="display: flex; align-items: center; justify-content: flex-start; gap: 3rem; min-width: max-content; margin: 0 auto;">
-              
-              @for (roundGroup of rounds; track roundGroup.roundNumber) {
-                <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 280px;">
-                  <div style="background: rgba(80, 227, 194, 0.1); border: 1px solid rgba(80, 227, 194, 0.3); padding: 8px 14px; border-radius: 6px; text-align: center;">
-                    <h4 style="color: #50e3c2; margin: 0; font-size: 0.9rem; letter-spacing: 1.5px; font-weight: 800; text-transform: uppercase;">{{ roundGroup.title }}</h4>
-                  </div>
-                  
-                  @for (match of roundGroup.matches; track match.match_id; let mIndex = $index) {
-                    <div style="background: #131b26; border: 1px solid {{ roundGroup.title === 'Finals' ? '#f5a623' : '#223249' }}; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                      <div style="background: #0b131d; padding: 6px 12px; font-size: 0.7rem; color: {{ roundGroup.title === 'Finals' ? '#f5a623' : '#64748b' }}; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid {{ roundGroup.title === 'Finals' ? '#f5a623' : '#1f2d3d' }}; display: flex; justify-content: space-between; align-items: center;">
-                        <span>MATCH #{{ mIndex + 1 }}</span>
-                        @if (roundGroup.title === 'Finals') {
-                          <span style="font-size: 0.65rem; background: rgba(245, 166, 35, 0.2); padding: 2px 6px; border-radius: 4px; color: #f5a623;">🏆 CHAMPIONSHIP</span>
-                        }
-                      </div>
-                      <div style="display: flex; flex-direction: column;">
-                        
-                        <!-- Team A Box -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: {{ match.winner_id && match.winner_id === match.team_a_id ? (roundGroup.title === 'Finals' ? 'rgba(245, 166, 35, 0.2)' : 'rgba(80, 227, 194, 0.18)') : '#0b131d' }}; padding: 10px 14px; border-bottom: 1px solid #1f2d3d; border-left: 4px solid {{ match.winner_id && match.winner_id === match.team_a_id ? (roundGroup.title === 'Finals' ? '#f5a623' : '#50e3c2') : 'transparent' }}; border-right: 2px solid {{ match.winner_id && match.winner_id === match.team_a_id && roundGroup.title === 'Finals' ? '#f5a623' : 'transparent' }};">
-                          <div style="display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden;">
-                            <span style="font-weight: {{ match.winner_id && match.winner_id === match.team_a_id ? '800' : '700' }}; font-size: 0.9rem; color: {{ match.winner_id && match.winner_id === match.team_a_id ? (roundGroup.title === 'Finals' ? '#f5a623' : '#50e3c2') : '#f1f5f9' }}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ match.team_a_name || 'TBD' }}">{{ match.team_a_name || 'TBD' }}</span>
-                            @if (match.winner_id && match.winner_id === match.team_a_id) {
-                              <span style="font-size: 0.7rem; font-weight: 800; color: {{ roundGroup.title === 'Finals' ? '#f5a623' : '#50e3c2' }};">{{ roundGroup.title === 'Finals' ? '👑 WINNER' : '✓ WINNER' }}</span>
-                            }
-                          </div>
-                          
-                          @if (match.winner_id || userRole === 'public') {
-                            <span style="font-weight: 800; font-size: 0.9rem; color: #f1f5f9; background: #131b26; padding: 4px 10px; border-radius: 6px; border: 1px solid #334155; min-width: 25px; text-align: center;">{{ match.score_a !== null ? match.score_a : '0' }}</span>
-                          } @else {
-                            <input type="number" [value]="match.tempScoreA" (input)="match.tempScoreA = $any($event.target).value" placeholder="0" style="width: 45px; background: #131b26; color: white; border: 1px solid #334155; text-align: center; padding: 5px; border-radius: 6px; font-weight: bold; font-size: 0.9rem;">
-                          }
-                        </div>
-
-                        <!-- Team B Box -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; background: {{ match.winner_id && match.winner_id === match.team_b_id ? (roundGroup.title === 'Finals' ? 'rgba(245, 166, 35, 0.2)' : 'rgba(80, 227, 194, 0.18)') : '#0b131d' }}; padding: 10px 14px; border-left: 4px solid {{ match.winner_id && match.winner_id === match.team_b_id ? (roundGroup.title === 'Finals' ? '#f5a623' : '#50e3c2') : 'transparent' }}; border-right: 2px solid {{ match.winner_id && match.winner_id === match.team_b_id && roundGroup.title === 'Finals' ? '#f5a623' : 'transparent' }};">
-                          <div style="display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden;">
-                            <span style="font-weight: {{ match.winner_id && match.winner_id === match.team_b_id ? '800' : '700' }}; font-size: 0.9rem; color: {{ match.winner_id && match.winner_id === match.team_b_id ? (roundGroup.title === 'Finals' ? '#f5a623' : '#50e3c2') : '#f1f5f9' }}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ match.team_b_name || 'TBD' }}">{{ match.team_b_name || 'TBD' }}</span>
-                            @if (match.winner_id && match.winner_id === match.team_b_id) {
-                              <span style="font-size: 0.7rem; font-weight: 800; color: {{ roundGroup.title === 'Finals' ? '#f5a623' : '#50e3c2' }};">{{ roundGroup.title === 'Finals' ? '👑 WINNER' : '✓ WINNER' }}</span>
-                            }
-                          </div>
-                          
-                          @if (match.winner_id || userRole === 'public') {
-                            <span style="font-weight: 800; font-size: 0.9rem; color: #f1f5f9; background: #131b26; padding: 4px 10px; border-radius: 6px; border: 1px solid #334155; min-width: 25px; text-align: center;">{{ match.score_b !== null ? match.score_b : '0' }}</span>
-                          } @else {
-                            <input type="number" [value]="match.tempScoreB" (input)="match.tempScoreB = $any($event.target).value" placeholder="0" style="width: 45px; background: #131b26; color: white; border: 1px solid #334155; text-align: center; padding: 5px; border-radius: 6px; font-weight: bold; font-size: 0.9rem;">
-                          }
-                        </div>
-
-                        <!-- Admin Save Score Footer Button -->
-                        @if (!match.winner_id && match.team_a_name && match.team_b_name && userRole === 'admin') {
-                          <button (click)="updateScore(match.match_id, match.tempScoreA, match.tempScoreB, match.team_a_id, match.team_b_id)" style="width: 100%; background: {{ roundGroup.title === 'Finals' ? '#f5a623' : '#334155' }}; color: {{ roundGroup.title === 'Finals' ? '#0b131d' : 'white' }}; border: none; border-top: 1px solid #1f2d3d; padding: 8px; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: background 0.2s;">Save score</button>
-                        }
-
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
-
-            </div>
-          </div>
-        } @else {
-          <div style="background: #0d1520; padding: 3.5rem; border: 1px dashed #334155; border-radius: 12px; text-align: center; color: #64748b; margin-bottom: 2.5rem;">
-            <p style="margin: 0; font-size: 1.1rem; font-weight: 600;">No bracket matches generated yet. Click "Generate Bracket" above!</p>
-          </div>
-        }
-
-        <!-- REGISTERED TEAMS DIRECTORY -->
-        <h3 style="color: #f8fafc; font-size: 1.25rem; font-weight: 700; margin: 2.5rem 0 1.2rem 0;">Registered Teams Directory</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem;">
-          @for (team of filteredTeams; track team.team_id) {
-            <div (click)="openTeamModal(team.team_id)" style="cursor: pointer; background: #0b131d; padding: 1.4rem; border: 1px solid #1f2d3d; border-radius: 10px; transition: border-color 0.2s;">
-              <h4 style="margin: 0 0 6px 0; color: #f8fafc; font-size: 1.05rem; font-weight: 700;">{{ team.team_name }}</h4>
-              <p style="color: #94a3b8; font-size: 0.85rem; margin: 0 0 12px 0;">Captain: <span style="color: #f1f5f9; font-weight: 600;">{{ team.captain_riot_id }}</span></p>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.8rem; color: #50e3c2; font-weight: 600;">View Roster &rarr;</span>
-                @if (userRole === 'admin') {
-                  <button (click)="$event.stopPropagation(); deleteTeam(team.team_id)" style="background: rgba(255, 70, 85, 0.15); color: #ff4655; border: 1px solid #ff4655; padding: 5px 12px; cursor: pointer; border-radius: 6px; font-size: 0.8rem; font-weight: 700;">Delete</button>
-                }
-              </div>
-            </div>
-          }
-          @empty {
-            <div style="background: #0b131d; padding: 2rem; border: 1px dashed #334155; border-radius: 10px; color: #64748b; grid-column: 1 / -1; text-align: center;">
-              <p style="margin: 0;">No teams registered for this tournament yet.</p>
-            </div>
-          }
-        </div>
-      </section>
-    }
-  }
-
-  <!-- TEAM ROSTER MODAL -->
-  @if (selectedTeamRoster) {
-    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 13, 0.85); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 1rem;">
-      <div style="background: #131b26; padding: 2rem; border-radius: 12px; border: 1px solid #334155; width: 420px; max-width: 100%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 1px solid #1f2d3d; padding-bottom: 0.8rem;">
-          <h2 style="margin: 0; color: #50e3c2; font-size: 1.25rem; font-weight: 800;">🛡️ {{ selectedTeamRoster.team.name }}</h2>
-          <button (click)="closeTeamModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
-        </div>
-        <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.8rem; text-transform: uppercase;">Confirmed Roster Lineup:</p>
-        <ul style="padding-left: 1.2rem; color: #f1f5f9; margin-bottom: 1.5rem;">
-          @for (player of selectedTeamRoster.roster; track player.riot_id) {
-            <li style="margin-bottom: 8px; font-weight: 600;">{{ player.riot_id }} <span style="font-size: 0.75rem; color: #64748b;">({{ player.email }})</span></li>
-          }
-        </ul>
-        <button (click)="closeTeamModal()" style="width: 100%; background: #27272a; color: white; border: 1px solid #3f3f46; padding: 11px; border-radius: 8px; font-weight: 700; cursor: pointer;">Close Roster</button>
+        <button (click)="registerFullTeam()" style="background: #ffc107; color: #000; font-weight: bold; border: none; padding: 10px 25px; border-radius: 4px; cursor: pointer;">Submit Team Registration</button>
       </div>
+
     </div>
-  }
-</main>
+
+    <!-- ========================================== -->
+    <!-- VIEW B: SELECTED TOURNAMENT HUB & BRACKET -->
+    <!-- ========================================== -->
+    <div *ngIf="activeTournament">
+      <div style="background: #1e1e1e; padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333;">
+        <span style="font-size: 12px; background: #333; padding: 3px 8px; border-radius: 4px;">{{ activeTournament.game_title }}</span>
+        <h2 style="margin: 10px 0;">{{ activeTournament.name }}</h2>
+        <p>Current Status: <strong style="color: #4dabf7;">{{ activeTournament.status }}</strong></p>
+
+        <!-- ADMIN BRACKET CONTROLS & MANUAL BUILDER -->
+        <div *ngIf="userRole === 'admin'" style="margin-top: 20px;">
+          
+          <!-- Generation Buttons (Visible when registration is open) -->
+          <div *ngIf="activeTournament.status === 'REGISTRATION_OPEN'" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button (click)="generateBracket()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+              🎲 Generate Random Bracket
+            </button>
+            <button (click)="openManualBracketBuilder()" style="background: #6f42c1; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+              🛠️ Create Manual Bracket
+            </button>
+          </div>
+
+          <!-- Reset Bracket Button (Visible when tournament is ongoing or completed) -->
+          <div *ngIf="activeTournament.status !== 'REGISTRATION_OPEN'" style="margin-top: 15px;">
+            <button (click)="resetBracket()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+              🔄 Reset Bracket & Re-open Registration
+            </button>
+          </div>
+
+          <!-- Manual Bracket Configuration Modal / Section -->
+          <div *ngIf="isManualBracketMode" style="background: #252525; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #555;">
+            <h3>🛠️ Configure Manual Round 1 Pairings</h3>
+            <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">Assign registered teams to each match slot for Round 1:</p>
+
+            <div *ngFor="let match of manualMatchups; let i = index" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+              <span style="font-weight: bold; min-width: 80px;">Match {{ i + 1 }}:</span>
+              
+              <!-- Team A Selection -->
+              <select [(ngModel)]="match.team_a_id" name="teamA_{{i}}" style="padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #555; border-radius: 4px; flex: 1;">
+                <option [ngValue]="null">-- Select Team A --</option>
+                <option *ngFor="let team of filteredTeams" [ngValue]="team.team_id">{{ team.team_name }}</option>
+              </select>
+
+              <span style="font-weight: bold; color: #aaa;">VS</span>
+
+              <!-- Team B Selection -->
+              <select [(ngModel)]="match.team_b_id" name="teamB_{{i}}" style="padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #555; border-radius: 4px; flex: 1;">
+                <option [ngValue]="null">-- BYE / None --</option>
+                <option *ngFor="let team of filteredTeams" [ngValue]="team.team_id">{{ team.team_name }}</option>
+              </select>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+              <button (click)="submitManualBracket()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                Confirm & Generate Bracket
+              </button>
+              <button (click)="cancelManualBracket()" style="background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tournament Bracket Tree View -->
+      <div style="background: #1e1e1e; padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333;">
+        <h3>⚔️ Tournament Bracket</h3>
+        
+        <div *ngIf="rounds.length === 0" style="color: #888; font-style: italic; padding: 20px 0;">
+          Bracket has not been generated yet.
+        </div>
+
+        <div style="display: flex; gap: 30px; overflow-x: auto; padding-bottom: 15px;">
+          <div *ngFor="let round of rounds" style="min-width: 250px; flex: 1;">
+            <h4 style="border-bottom: 2px solid #444; padding-bottom: 8px; margin-bottom: 15px; text-align: center; color: #4dabf7;">{{ round.title }}</h4>
+            
+            <div *ngFor="let match of round.matches" style="background: #252525; border: 1px solid #444; border-radius: 6px; padding: 12px; margin-bottom: 15px;">
+              
+              <!-- Team A Row -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #333;">
+                <span [style.color]="match.winner_id === match.team_a_id ? '#28a745' : '#fff'" style="font-weight: 500;">
+                  {{ match.team_a_name || 'TBD (Waiting)' }}
+                </span>
+                <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="userRole !== 'admin'" style="width: 40px; background: #111; color: #fff; border: 1px solid #555; text-align: center; border-radius: 4px; padding: 2px;">
+              </div>
+
+              <!-- Team B Row -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span [style.color]="match.winner_id === match.team_b_id ? '#28a745' : '#fff'" style="font-weight: 500;">
+                  {{ match.team_b_name || 'TBD (Waiting)' }}
+                </span>
+                <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="userRole !== 'admin'" style="width: 40px; background: #111; color: #fff; border: 1px solid #555; text-align: center; border-radius: 4px; padding: 2px;">
+              </div>
+
+              <!-- Admin Score Save Button -->
+              <div *ngIf="userRole === 'admin' && match.team_a_id && match.team_b_id">
+                <button (click)="updateScore(match.match_id, match.tempScoreA, match.tempScoreB, match.team_a_id, match.team_b_id)" style="width: 100%; background: #007bff; color: white; border: none; padding: 5px; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                  Save Score & Advance
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registered Teams Directory for this Tournament -->
+      <div style="background: #1e1e1e; padding: 25px; border-radius: 8px; border: 1px solid #333;">
+        <h3>🛡️ Registered Teams Directory</h3>
+        
+        <div *ngIf="filteredTeams.length === 0" style="color: #888; font-style: italic; padding: 15px 0;">
+          No teams registered for this tournament yet.
+        </div>
+
+        <ul style="list-style: none; padding: 0; margin-top: 15px;">
+          <li *ngFor="let team of filteredTeams" style="background: #252525; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444;">
+            <div>
+              <strong style="font-size: 16px; color: #4dabf7;">{{ team.team_name }}</strong>
+              <span style="font-size: 13px; color: #aaa; margin-left: 15px;">Captain: {{ team.captain_riot_id }}</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+              <button (click)="openTeamModal(team.team_id)" style="background: #17a2b8; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">View Roster</button>
+              <button *ngIf="userRole === 'admin'" (click)="deleteTeam(team.team_id)" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">Delete Team</button>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TEAM ROSTER MODAL POPUP -->
+  <!-- ========================================== -->
+  <div *ngIf="selectedTeamRoster" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+    <div style="background: #1e1e1e; padding: 30px; border-radius: 8px; width: 400px; border: 1px solid #444; position: relative;">
+      <h3>📋 Team Roster Details</h3>
+      <h4 style="color: #4dabf7; margin: 10px 0 20px 0;">{{ selectedTeamRoster.team.name }}</h4>
+
+      <ul style="list-style: disc; padding-left: 20px; margin-bottom: 25px;">
+        <li *ngFor="let player of selectedTeamRoster.roster" style="margin-bottom: 8px;">
+          {{ player.riot_id }} <span style="color: #888; font-size: 12px;">({{ player.email }})</span>
+        </li>
+      </ul>
+
+      <button (click)="closeTeamModal()" style="width: 100%; background: #6c757d; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Close Roster</button>
+    </div>
+  </div>
+
+</div>

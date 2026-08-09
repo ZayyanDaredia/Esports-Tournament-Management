@@ -2,13 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const path = require('path'); // Added for Vercel frontend routing
+const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 const db = require('./db');
 
 const app = express();
 
-// Updated CORS to allow requests in production on Vercel
 app.use(cors());
 app.use(express.json());
 
@@ -174,6 +174,68 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
     } catch (error) {
         await connection.rollback();
         console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        connection.release();
+    }
+});
+
+app.post('/api/tournaments/:id/generate-manual-bracket', verifyAdmin, async (req, res) => {
+    const tournamentId = req.params.id;
+    const { matchups } = req.body;
+
+    if (!matchups || !Array.isArray(matchups) || matchups.length === 0) {
+        return res.status(400).json({ error: 'Manual matchups are required.' });
+    }
+
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        
+        await connection.execute('DELETE FROM Matches WHERE tournament_id = ?', [tournamentId]);
+
+        let roundNum = 1;
+        let currentRoundMatchIds = [];
+
+        for (let pair of matchups) {
+            const teamA = pair.team_a_id || null;
+            const teamB = pair.team_b_id !== undefined ? pair.team_b_id : null;
+
+            const [mRes] = await connection.execute(
+                'INSERT INTO Matches (tournament_id, round_number, team_a_id, team_b_id, winner_id, score_a, score_b) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [tournamentId, roundNum, teamA, teamB, teamB === null ? teamA : null, teamB === null ? 1 : 0, 0]
+            );
+            currentRoundMatchIds.push(mRes.insertId);
+        }
+
+        let prevRoundIds = currentRoundMatchIds;
+        while (prevRoundIds.length > 1) {
+            roundNum++;
+            const nextRoundIds = [];
+            for (let i = 0; i < prevRoundIds.length; i += 2) {
+                const [nextRes] = await connection.execute(
+                    'INSERT INTO Matches (tournament_id, round_number) VALUES (?, ?)',
+                    [tournamentId, roundNum]
+                );
+                const nextMatchId = nextRes.insertId;
+                nextRoundIds.push(nextMatchId);
+
+                await connection.execute('UPDATE Matches SET next_match_id = ? WHERE match_id IN (?, ?)', [
+                    nextMatchId,
+                    prevRoundIds[i],
+                    prevRoundIds[i + 1] || prevRoundIds[i]
+                ]);
+            }
+            prevRoundIds = nextRoundIds;
+        }
+
+        await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['ONGOING', tournamentId]);
+        await connection.commit();
+
+        res.status(201).json({ message: 'Manual elimination bracket generated successfully!' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('Manual bracket error:', error);
         res.status(500).json({ error: 'Internal server error' });
     } finally {
         connection.release();
@@ -363,7 +425,6 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
                 }
             }
         } else {
-            // If next_match_id is NULL, this is the Finals match! Mark tournament as COMPLETED.
             await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['COMPLETED', tournamentId]);
         }
 
@@ -380,22 +441,23 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
 // ==========================================
 // VERCEL ANGULAR FRONTEND SERVING
 // ==========================================
-// Adjust this path if your build folder differs (e.g., just 'esports-frontend/dist')
-const frontendPath = path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser');
+const possibleFrontendPaths = [
+    path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser'),
+    path.join(__dirname, 'dist/esports-frontend/browser'),
+    path.join(__dirname, 'esports-frontend/dist'),
+    path.join(__dirname, 'dist')
+];
+
+const frontendPath = possibleFrontendPaths.find(p => fs.existsSync(path.join(p, 'index.html'))) || possibleFrontendPaths[0];
 app.use(express.static(frontendPath));
 
-// Catch-all route to serve the Angular index.html file for any unknown paths
-// Catch-all route to serve the Angular index.html file for any unknown paths
-// Catch-all route to serve the Angular index.html file for any unknown paths
 app.use((req, res) => {
     const indexPath = path.join(frontendPath, 'index.html');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error("Vercel static file error:", err);
-            res.status(404).send(`Error: Angular frontend not found! Express is looking for it exactly here: <br><br> ${indexPath} <br><br> Check your GitHub repository to ensure this folder structure exists.`);
+            res.status(404).send(`Error: Angular frontend not found at ${indexPath}`);
         }
     });
 });
 
-// EXPORT APP FOR VERCEL SERVERLESS FUNCTIONS
 module.exports = app;

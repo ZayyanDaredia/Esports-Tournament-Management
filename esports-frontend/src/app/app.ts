@@ -31,6 +31,10 @@ export class App implements OnInit, OnDestroy {
   activeTournament: any = null;
   selectedTeamRoster: any = null;
 
+  // Manual Bracket Builder State
+  isManualBracketMode: boolean = false;
+  manualMatchups: { team_a_id: number | null, team_b_id: number | null }[] = [];
+
   // Filter & Search state
   searchQuery: string = '';
   selectedGame: string = 'ALL';
@@ -194,6 +198,7 @@ export class App implements OnInit, OnDestroy {
   selectTournament(tourney: any) {
     this.activeTournament = tourney;
     this.filteredTeams = this.teams.filter(t => t.tournament_id === tourney.tournament_id);
+    this.isManualBracketMode = false;
     
     this.http.get<any[]>(`/api/tournaments/${tourney.tournament_id}/matches`).subscribe({
       next: (data) => { 
@@ -275,6 +280,50 @@ export class App implements OnInit, OnDestroy {
         this.fetchTournaments();
       },
       error: (err) => alert(err.error.error || 'Error generating bracket.')
+    });
+  }
+
+  openManualBracketBuilder() {
+    if (!this.filteredTeams || this.filteredTeams.length < 2) {
+      alert('At least 2 registered teams are required to build a bracket.');
+      return;
+    }
+    this.isManualBracketMode = true;
+    this.manualMatchups = [];
+    
+    const teamsCopy = [...this.filteredTeams];
+    for (let i = 0; i < teamsCopy.length; i += 2) {
+      this.manualMatchups.push({
+        team_a_id: teamsCopy[i] ? teamsCopy[i].team_id : null,
+        team_b_id: teamsCopy[i + 1] ? teamsCopy[i + 1].team_id : null
+      });
+    }
+  }
+
+  cancelManualBracket() {
+    this.isManualBracketMode = false;
+    this.manualMatchups = [];
+  }
+
+  submitManualBracket() {
+    if (!this.activeTournament) return;
+
+    for (let m of this.manualMatchups) {
+      if (!m.team_a_id) {
+        alert('Every match must have at least a Team A assigned.');
+        return;
+      }
+    }
+
+    this.http.post(`/api/tournaments/${this.activeTournament.tournament_id}/generate-manual-bracket`, {
+      matchups: this.manualMatchups
+    }, this.getAuthHeaders()).subscribe({
+      next: () => {
+        this.isManualBracketMode = false;
+        this.selectTournament(this.activeTournament);
+        this.fetchTournaments();
+      },
+      error: (err) => alert(err.error.error || 'Failed to generate manual bracket')
     });
   }
 
