@@ -386,16 +386,16 @@ app.use(express.static(frontendPath));
 
 // Catch-all route to serve the Angular index.html file for any unknown paths
 // Catch-all route to serve the Angular index.html file for any unknown paths
+// Catch-all route to serve the Angular index.html file for any unknown paths
 app.use((req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
-});
-
-// Start the server natively (useful for local testing)
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+    const indexPath = path.join(frontendPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error("Vercel static file error:", err);
+            res.status(404).send(`Error: Angular frontend not found! Express is looking for it exactly here: <br><br> ${indexPath} <br><br> Check your GitHub repository to ensure this folder structure exists.`);
+        }
     });
-}
+});
 
 // EXPORT APP FOR VERCEL SERVERLESS FUNCTIONS
 module.exports = app;
