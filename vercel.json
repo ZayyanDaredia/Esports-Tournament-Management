@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd esports-frontend && npm install && npm run build",
+  "buildCommand": "npm run build",
   "builds": [
     {
       "src": "server.js",
@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "server.js"
+      "destination": "server.js"
     }
   ]
 }
