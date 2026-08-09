@@ -1,7 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { Subscription, timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +12,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit {
+export class App implements OnInit, OnDestroy {
   http = inject(HttpClient);
   cdr = inject(ChangeDetectorRef);
   
@@ -47,6 +49,8 @@ export class App implements OnInit {
   regSub2: string = '';
   submittedAttempt: boolean = false;
 
+  private pollSub?: Subscription;
+
   ngOnInit() {
     const savedRole = localStorage.getItem('userRole');
     const savedToken = localStorage.getItem('authToken');
@@ -58,8 +62,37 @@ export class App implements OnInit {
       this.username = savedUser;
       this.userId = savedUserId ? parseInt(savedUserId) : null;
     }
+    
+    // Initial fetch
     this.fetchTournaments();
     this.fetchTeams();
+
+    // Real-time background polling every 4 seconds for tournaments, teams, and active bracket matches
+    this.pollSub = timer(4000, 4000).pipe(
+      switchMap(() => this.http.get<any[]>('/api/tournaments'))
+    ).subscribe({
+      next: (tournamentsData) => {
+        this.tournaments = tournamentsData;
+        this.updateVisibleTournaments();
+
+        this.http.get<any[]>('/api/teams').subscribe(teamsData => {
+          this.teams = teamsData;
+          if (this.activeTournament) {
+            this.filteredTeams = this.teams.filter(t => t.tournament_id === this.activeTournament.tournament_id);
+            this.pollActiveTournamentMatchesQuietly();
+          }
+          this.updateVisibleTournaments();
+          this.cdr.detectChanges();
+        });
+      },
+      error: (err) => console.error('Polling error:', err)
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.pollSub) {
+      this.pollSub.unsubscribe();
+    }
   }
 
   getAuthHeaders() {
@@ -170,38 +203,60 @@ export class App implements OnInit {
           tempScoreB: m.score_b !== null ? m.score_b : 0
         }));
 
-        const roundMap = new Map<number, any[]>();
-        this.matches.forEach(m => {
-          const r = m.round_number || 1;
-          if (!roundMap.has(r)) roundMap.set(r, []);
-          roundMap.get(r)!.push(m);
-        });
+        this.processRoundsData();
+        this.cdr.detectChanges(); 
+      }
+    });
+  }
 
-        const totalRounds = roundMap.size;
-        this.rounds = Array.from(roundMap.keys()).sort((a, b) => a - b).map(r => {
-          const distanceFromEnd = totalRounds - r;
-          let title = `Round ${r}`;
-          if (distanceFromEnd === 0) {
-            title = 'Finals';
-          } else if (distanceFromEnd === 1) {
-            title = 'Semi-finals';
-          } else if (distanceFromEnd === 2) {
-            title = 'Quarter-finals';
-          } else if (distanceFromEnd === 3) {
-            title = 'Round of 16';
-          } else if (distanceFromEnd === 4) {
-            title = 'Round of 32';
-          }
-
+  pollActiveTournamentMatchesQuietly() {
+    if (!this.activeTournament) return;
+    this.http.get<any[]>(`/api/tournaments/${this.activeTournament.tournament_id}/matches`).subscribe({
+      next: (data) => {
+        this.matches = (data as any[]).map(m => {
+          const existing = this.matches.find(ex => ex.match_id === m.match_id);
           return {
-            roundNumber: r,
-            title: title,
-            matches: roundMap.get(r)!
+            ...m,
+            tempScoreA: existing && existing.tempScoreA !== undefined ? existing.tempScoreA : (m.score_a !== null ? m.score_a : 0),
+            tempScoreB: existing && existing.tempScoreB !== undefined ? existing.tempScoreB : (m.score_b !== null ? m.score_b : 0)
           };
         });
 
-        this.cdr.detectChanges(); 
+        this.processRoundsData();
+        this.cdr.detectChanges();
       }
+    });
+  }
+
+  processRoundsData() {
+    const roundMap = new Map<number, any[]>();
+    this.matches.forEach(m => {
+      const r = m.round_number || 1;
+      if (!roundMap.has(r)) roundMap.set(r, []);
+      roundMap.get(r)!.push(m);
+    });
+
+    const totalRounds = roundMap.size;
+    this.rounds = Array.from(roundMap.keys()).sort((a, b) => a - b).map(r => {
+      const distanceFromEnd = totalRounds - r;
+      let title = `Round ${r}`;
+      if (distanceFromEnd === 0) {
+        title = 'Finals';
+      } else if (distanceFromEnd === 1) {
+        title = 'Semi-finals';
+      } else if (distanceFromEnd === 2) {
+        title = 'Quarter-finals';
+      } else if (distanceFromEnd === 3) {
+        title = 'Round of 16';
+      } else if (distanceFromEnd === 4) {
+        title = 'Round of 32';
+      }
+
+      return {
+        roundNumber: r,
+        title: title,
+        matches: roundMap.get(r)!
+      };
     });
   }
 
