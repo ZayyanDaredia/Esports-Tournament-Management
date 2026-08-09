@@ -1,0 +1,1 @@
+require("dotenv").config(); const db = require("./db"); async function run() { const [res] = await db.execute("UPDATE Users SET role = 'admin' WHERE username = ?", ["esports_director"]); console.log("Success! Rows updated:", res.affectedRows); process.exit(); } run();
