@@ -385,7 +385,8 @@ const frontendPath = path.join(__dirname, 'esports-frontend/dist/esports-fronten
 app.use(express.static(frontendPath));
 
 // Catch-all route to serve the Angular index.html file for any unknown paths
-app.get('/(.*)', (req, res) => {
+// Catch-all route to serve the Angular index.html file for any unknown paths
+app.use((req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
