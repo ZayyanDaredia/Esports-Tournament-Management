@@ -439,7 +439,7 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
 });
 
 // ==========================================
-// VERCEL ANGULAR FRONTEND SERVING
+// VERCEL ANGULAR FRONTEND SERVING (With Anti-Cache Control)
 // ==========================================
 const possibleFrontendPaths = [
     path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser'),
@@ -449,10 +449,20 @@ const possibleFrontendPaths = [
 ];
 
 const frontendPath = possibleFrontendPaths.find(p => fs.existsSync(path.join(p, 'index.html'))) || possibleFrontendPaths[0];
-app.use(express.static(frontendPath));
+
+app.use(express.static(frontendPath, {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('index.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        } else {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+    }
+}));
 
 app.use((req, res) => {
     const indexPath = path.join(frontendPath, 'index.html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(indexPath, (err) => {
         if (err) {
             res.status(404).send(`Error: Angular frontend not found at ${indexPath}`);
