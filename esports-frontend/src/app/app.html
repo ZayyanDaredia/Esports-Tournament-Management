@@ -1,43 +1,53 @@
-<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; color: #f0f0f0; background: #0b0e14; min-height: 100vh;">
+<div class="container" style="max-width: 1280px; margin: 0 auto; padding: 30px 20px; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #f3f4f6; background: #0b0f17; min-height: 100vh; box-sizing: border-box;">
 
   <!-- ========================================== -->
-  <!-- HEADER & AUTHENTICATION BAR -->
+  <!-- 1. ESPORTS HUB TITLE BOX & USER / LOGOUT -->
   <!-- ========================================== -->
-  <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1f2937; padding-bottom: 15px; margin-bottom: 25px; background: #131822; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-    <h1 style="margin: 0; font-size: 22px; color: #ff4655; display: flex; align-items: center; gap: 8px; font-weight: 900; letter-spacing: 0.5px;">
-      ⚡ ESPORTS HUB
-    </h1>
+  <header style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #131b2e 0%, #0d1424 100%); padding: 20px 30px; border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); margin-bottom: 35px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="background: rgba(255, 70, 85, 0.15); padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 70, 85, 0.3);">
+        <span style="font-size: 22px;">⚡</span>
+      </div>
+      <div>
+        <h1 style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 800; letter-spacing: 0.5px;">ESPORTS HUB</h1>
+        <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8; font-weight: 500;">Competitive Tournament Management Platform</p>
+      </div>
+    </div>
     
-    <div *ngIf="userRole" style="display: flex; align-items: center; gap: 12px;">
-      <span style="font-size: 13px; color: #9ca3af;">Logged in as: <strong style="background: #1f2937; padding: 4px 10px; border-radius: 4px; color: #fff; border: 1px solid #374151;">{{ userId || username }} ({{ userRole | uppercase }})</strong></span>
-      <button (click)="logout()" style="background: #ff4655; color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; transition: background 0.2s;">Logout</button>
+    <div *ngIf="userRole" style="display: flex; align-items: center; gap: 16px;">
+      <div style="background: #0f172a; padding: 6px 14px; border-radius: 20px; border: 1px solid #334155; display: flex; align-items: center; gap: 8px;">
+        <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981;"></span>
+        <span style="font-size: 13px; color: #cbd5e1;">{{ username }} <strong style="color: #38bdf8; text-transform: uppercase; font-size: 11px; margin-left: 4px;">({{ userRole }})</strong></span>
+      </div>
+      <button (click)="logout()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Logout</button>
     </div>
   </header>
 
   <!-- ========================================== -->
   <!-- LOGIN / SIGNUP VIEW (If Not Logged In) -->
   <!-- ========================================== -->
-  <div *ngIf="!userRole" style="max-width: 400px; margin: 80px auto; background: #131822; padding: 30px; border-radius: 8px; border: 1px solid #1f2937;">
-    <h2 style="text-align: center; margin-bottom: 20px; color: #fff; font-size: 20px;">{{ authMode === 'login' ? 'Login' : 'Sign Up' }}</h2>
+  <div *ngIf="!userRole" style="max-width: 420px; margin: 60px auto; background: #131b2e; padding: 35px; border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6);">
+    <h2 style="text-align: center; margin: 0 0 8px 0; color: #fff; font-size: 22px; font-weight: 700;">{{ authMode === 'login' ? 'Welcome Back' : 'Create Account' }}</h2>
+    <p style="text-align: center; color: #94a3b8; font-size: 13px; margin-bottom: 25px;">Enter your credentials to access the platform</p>
     
     <form (submit)="$event.preventDefault()">
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Username</label>
-        <input type="text" #userInput style="width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; box-sizing: border-box;">
+      <div style="margin-bottom: 18px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Username</label>
+        <input type="text" #userInput placeholder="Enter your username" style="width: 100%; padding: 12px 14px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s;">
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 12px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Password</label>
-        <input type="password" #passInput style="width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; box-sizing: border-box;">
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Password</label>
+        <input type="password" #passInput placeholder="Enter your password" style="width: 100%; padding: 12px 14px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s;">
       </div>
 
-      <button *ngIf="authMode === 'login'" (click)="login(userInput.value, passInput.value)" style="width: 100%; background: #ff4655; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">Login</button>
-      <button *ngIf="authMode === 'signup'" (click)="signup(userInput.value, passInput.value)" style="width: 100%; background: #20b2aa; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">Register Account</button>
+      <button *ngIf="authMode === 'login'" (click)="login(userInput.value, passInput.value)" style="width: 100%; background: #ff4655; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(255, 70, 85, 0.4);">Login</button>
+      <button *ngIf="authMode === 'signup'" (click)="signup(userInput.value, passInput.value)" style="width: 100%; background: #10b981; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">Register Account</button>
     </form>
 
-    <p style="text-align: center; margin-top: 15px; font-size: 14px;">
-      <span *ngIf="authMode === 'login'" style="color: #9ca3af;">Don't have an account? <a (click)="authMode = 'signup'" style="color: #20b2aa; cursor: pointer; text-decoration: underline;">Sign up</a></span>
-      <span *ngIf="authMode === 'signup'" style="color: #9ca3af;">Already have an account? <a (click)="authMode = 'login'" style="color: #20b2aa; cursor: pointer; text-decoration: underline;">Login</a></span>
+    <p style="text-align: center; margin-top: 20px; font-size: 13px;">
+      <span *ngIf="authMode === 'login'" style="color: #94a3b8;">Don't have an account? <a (click)="authMode = 'signup'" style="color: #38bdf8; cursor: pointer; font-weight: 600; text-decoration: none;">Sign up</a></span>
+      <span *ngIf="authMode === 'signup'" style="color: #94a3b8;">Already have an account? <a (click)="authMode = 'login'" style="color: #38bdf8; cursor: pointer; font-weight: 600; text-decoration: none;">Login</a></span>
     </p>
   </div>
 
@@ -47,82 +57,88 @@
   <div *ngIf="userRole">
 
     <!-- ========================================== -->
-    <!-- SECTION 1: TEAM REGISTRATION FORM -->
+    <!-- 2. REGISTER TEAM ROSTER SECTION -->
     <!-- ========================================== -->
-    <div style="background: #131822; padding: 25px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #1f2937;">
-      <h3 style="margin-top: 0; color: #20b2aa; display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: bold;">📝 Register Team Roster</h3>
-      
-      <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px;">
+    <div style="background: #131b2e; padding: 30px; border-radius: 12px; margin-bottom: 35px; border: 1px solid #1e293b; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #1e293b; padding-bottom: 15px;">
+        <span style="font-size: 20px;">📝</span>
         <div>
-          <label style="display: block; margin-bottom: 5px; font-size: 11px; color: #20b2aa; text-transform: uppercase; font-weight: bold;">Tournament *</label>
-          <select [(ngModel)]="regTourneyId" style="width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px;">
+          <h3 style="margin: 0; color: #fff; font-size: 18px; font-weight: 700;">Register Team Roster</h3>
+          <p style="margin: 2px 0 0 0; font-size: 12px; color: #94a3b8;">Build your squad line-up and enroll in an open tournament</p>
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div>
+          <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #38bdf8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Tournament *</label>
+          <select [(ngModel)]="regTourneyId" style="width: 100%; padding: 12px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 13px; outline: none;">
             <option value="">Choose Tournament To Take Part In</option>
             <option *ngFor="let t of tournaments" [value]="t.tournament_id">{{ t.name }} ({{ t.game_title }})</option>
           </select>
         </div>
         <div>
-          <label style="display: block; margin-bottom: 5px; font-size: 11px; color: #20b2aa; text-transform: uppercase; font-weight: bold;">Team Name *</label>
-          <input type="text" [(ngModel)]="regTeamName" placeholder="Team Name" style="width: 100%; padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; box-sizing: border-box;">
-        </div>
-      </div>
-
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 11px; color: #20b2aa; text-transform: uppercase; font-weight: bold;">Main Squad Lineup *</label>
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
-          <input type="text" [(ngModel)]="regCap" placeholder="Player 1 - Captain" style="padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
-          <input type="text" [(ngModel)]="regP2" placeholder="Player 2" style="padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
-          <input type="text" [(ngModel)]="regP3" placeholder="Player 3" style="padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
-          <input type="text" [(ngModel)]="regP4" placeholder="Player 4" style="padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
-          <input type="text" [(ngModel)]="regP5" placeholder="Player 5" style="padding: 10px; background: #0b0e14; border: 1px solid #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
+          <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #38bdf8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Team Name *</label>
+          <input type="text" [(ngModel)]="regTeamName" placeholder="Enter Team Name" style="width: 100%; padding: 12px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; box-sizing: border-box; font-size: 13px; outline: none;">
         </div>
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 5px; font-size: 11px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">Substitutes (Optional)</label>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-          <input type="text" [(ngModel)]="regSub1" placeholder="Substitute 1" style="padding: 10px; background: #0b0e14; border: 1px dashed #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
-          <input type="text" [(ngModel)]="regSub2" placeholder="Substitute 2" style="padding: 10px; background: #0b0e14; border: 1px dashed #374151; color: #fff; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 13px;">
+        <label style="display: block; margin-bottom: 8px; font-size: 11px; color: #38bdf8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Main Squad Lineup (1 Captain + 4 Players) *</label>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+          <input type="text" [(ngModel)]="regCap" placeholder="Player 1 - Captain" style="padding: 11px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
+          <input type="text" [(ngModel)]="regP2" placeholder="Player 2" style="padding: 11px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
+          <input type="text" [(ngModel)]="regP3" placeholder="Player 3" style="padding: 11px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
+          <input type="text" [(ngModel)]="regP4" placeholder="Player 4" style="padding: 11px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
+          <input type="text" [(ngModel)]="regP5" placeholder="Player 5" style="padding: 11px; background: #0b0f17; border: 1px solid #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
         </div>
       </div>
 
-      <button (click)="registerFullTeam()" style="width: 100%; background: #ff4655; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 15px;">Submit Roster</button>
+      <div style="margin-bottom: 25px;">
+        <label style="display: block; margin-bottom: 8px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Substitutes (Optional)</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <input type="text" [(ngModel)]="regSub1" placeholder="Substitute 1 IGN" style="padding: 11px; background: #0b0f17; border: 1px dashed #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
+          <input type="text" [(ngModel)]="regSub2" placeholder="Substitute 2 IGN" style="padding: 11px; background: #0b0f17; border: 1px dashed #334155; color: #fff; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 13px; outline: none;">
+        </div>
+      </div>
+
+      <button (click)="registerFullTeam()" style="width: 100%; background: linear-gradient(135deg, #ff4655 0%, #e03e4d 100%); color: white; border: none; padding: 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 4px 15px rgba(255, 70, 85, 0.4); transition: opacity 0.2s;">Submit Roster & Enroll</button>
     </div>
 
     <!-- ========================================== -->
-    <!-- SECTION 2: ACTIVE TOURNAMENTS & HUBS -->
+    <!-- 3. ACTIVE TOURNAMENTS & HUBS SECTION -->
     <!-- ========================================== -->
-    <div style="background: #131822; padding: 25px; border-radius: 8px; border: 1px solid #1f2937;">
+    <div style="background: #131b2e; padding: 30px; border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);">
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-        <h2 style="margin: 0; font-size: 20px; color: #fff; font-weight: bold;">Active Tournaments & Hubs</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #1e293b; padding-bottom: 15px;">
+        <h2 style="margin: 0; font-size: 20px; color: #fff; font-weight: 700;">Active Tournaments & Hubs</h2>
         
-        <div style="display: flex; background: #0b0e14; border-radius: 6px; padding: 3px; border: 1px solid #1f2937;">
-          <button (click)="tournamentView = 'all'" [style.background]="tournamentView === 'all' ? '#20b2aa' : 'transparent'" [style.color]="tournamentView === 'all' ? '#fff' : '#9ca3af'" style="border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;">All Tournaments</button>
-          <button (click)="tournamentView = 'my'" [style.background]="tournamentView === 'my' ? '#20b2aa' : 'transparent'" [style.color]="tournamentView === 'my' ? '#fff' : '#9ca3af'" style="border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;">My Tournaments Tracker</button>
+        <div style="display: flex; background: #0b0f17; border-radius: 8px; padding: 4px; border: 1px solid #334155;">
+          <button (click)="tournamentView = 'all'" [style.background]="tournamentView === 'all' ? '#10b981' : 'transparent'" [style.color]="tournamentView === 'all' ? '#fff' : '#94a3b8'" style="border: none; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">All Tournaments</button>
+          <button (click)="tournamentView = 'my'" [style.background]="tournamentView === 'my' ? '#10b981' : 'transparent'" [style.color]="tournamentView === 'my' ? '#fff' : '#94a3b8'" style="border: none; padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">My Tournaments Tracker</button>
         </div>
       </div>
 
       <!-- Admin Create Tournament Box -->
-      <div *ngIf="userRole === 'admin'" style="background: #0b0e14; padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #1f2937;">
-        <h4 style="margin: 0 0 10px 0; color: #20b2aa; font-size: 13px; text-transform: uppercase; font-weight: bold;">➕ Admin: Create New Tournament</h4>
-        <div style="display: flex; gap: 10px;">
-          <input type="text" placeholder="Tournament Name" #newTourneyName style="flex: 2; padding: 8px 12px; background: #131822; border: 1px solid #374151; color: #fff; border-radius: 4px; font-size: 13px;">
-          <input type="text" placeholder="Game Title (e.g. Valorant)" #newTourneyGame style="flex: 1; padding: 8px 12px; background: #131822; border: 1px solid #374151; color: #fff; border-radius: 4px; font-size: 13px;">
-          <button (click)="createTournament(newTourneyName.value, newTourneyGame.value); newTourneyName.value='';" style="background: #20b2aa; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Create</button>
+      <div *ngIf="userRole === 'admin'" style="background: #0b0f17; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155;">
+        <h4 style="margin: 0 0 12px 0; color: #10b981; font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">➕ Admin Control: Create New Tournament</h4>
+        <div style="display: flex; gap: 12px;">
+          <input type="text" placeholder="Tournament Name" #newTourneyName style="flex: 2; padding: 10px 14px; background: #131b2e; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 13px; outline: none;">
+          <input type="text" placeholder="Game Title (e.g. Valorant)" #newTourneyGame style="flex: 1; padding: 10px 14px; background: #131b2e; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 13px; outline: none;">
+          <button (click)="createTournament(newTourneyName.value, newTourneyGame.value); newTourneyName.value='';" style="background: #10b981; color: white; border: none; padding: 10px 22px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 13px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Create</button>
         </div>
       </div>
 
       <!-- Filters & Search Toolbar -->
-      <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; background: #0b0e14; padding: 12px; border-radius: 6px; border: 1px solid #1f2937;">
-        <input type="text" [(ngModel)]="searchQuery" placeholder="🔍 Search tournaments by name..." style="flex: 2; padding: 8px 12px; background: #131822; border: 1px solid #374151; color: #fff; border-radius: 4px; font-size: 13px;">
+      <div style="display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; background: #0b0f17; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="🔍 Search tournaments by name..." style="flex: 2; padding: 10px 14px; background: #131b2e; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 13px; outline: none;">
         
-        <div style="display: flex; gap: 4px; align-items: center; background: #131822; padding: 0 8px; border-radius: 4px; border: 1px solid #374151;">
-          <button (click)="selectedGame = 'ALL'" [style.color]="selectedGame === 'ALL' ? '#20b2aa' : '#9ca3af'" style="background: none; border: none; cursor: pointer; font-size: 12px; font-weight: bold; padding: 6px;">All Games</button>
-          <button (click)="selectedGame = 'Valorant'" [style.color]="selectedGame === 'Valorant' ? '#20b2aa' : '#9ca3af'" style="background: none; border: none; cursor: pointer; font-size: 12px; padding: 6px;">Valorant</button>
-          <button (click)="selectedGame = 'CS2'" [style.color]="selectedGame === 'CS2' ? '#20b2aa' : '#9ca3af'" style="background: none; border: none; cursor: pointer; font-size: 12px; padding: 6px;">CS2</button>
+        <div style="display: flex; gap: 4px; align-items: center; background: #131b2e; padding: 0 10px; border-radius: 6px; border: 1px solid #334155;">
+          <button (click)="selectedGame = 'ALL'" [style.color]="selectedGame === 'ALL' ? '#38bdf8' : '#94a3b8'" style="background: none; border: none; cursor: pointer; font-size: 12px; font-weight: 600; padding: 8px;">All Games</button>
+          <button (click)="selectedGame = 'Valorant'" [style.color]="selectedGame === 'Valorant' ? '#38bdf8' : '#94a3b8'" style="background: none; border: none; cursor: pointer; font-size: 12px; padding: 8px;">Valorant</button>
+          <button (click)="selectedGame = 'CS2'" [style.color]="selectedGame === 'CS2' ? '#38bdf8' : '#94a3b8'" style="background: none; border: none; cursor: pointer; font-size: 12px; padding: 8px;">CS2</button>
         </div>
 
-        <select [(ngModel)]="selectedStatus" style="flex: 1; padding: 8px; background: #131822; border: 1px solid #374151; color: #fff; border-radius: 4px; font-size: 13px;">
+        <select [(ngModel)]="selectedStatus" style="flex: 1; padding: 10px; background: #131b2e; border: 1px solid #334155; color: #fff; border-radius: 6px; font-size: 13px; outline: none;">
           <option value="ALL">All Statuses</option>
           <option value="REGISTRATION_OPEN">Registration Open</option>
           <option value="ONGOING">Ongoing</option>
@@ -130,82 +146,82 @@
         </select>
       </div>
 
-      <!-- Tournaments Grid / Cards (Restored Border & Aesthetic) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 30px;" *ngIf="!activeTournament">
-        <div *ngFor="let t of filteredTournaments" style="background: #0b0e14; border: 1px solid #20b2aa; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+      <!-- Tournaments Grid / Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;" *ngIf="!activeTournament">
+        <div *ngFor="let t of filteredTournaments" style="background: #0b0f17; border: 1px solid #334155; padding: 20px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s, border-color 0.2s;">
           <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <span style="font-size: 10px; background: #1f2937; padding: 3px 8px; border-radius: 4px; color: #9ca3af; text-transform: uppercase; font-weight: bold;">{{ t.status }}</span>
-              <span style="font-size: 12px; color: #9ca3af; font-weight: bold;">#{{ t.tournament_id }}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-size: 10px; background: #1e293b; padding: 4px 10px; border-radius: 20px; color: #38bdf8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
+              <span style="font-size: 12px; color: #64748b; font-weight: 600;">ID #{{ t.tournament_id }}</span>
             </div>
-            <h3 style="margin: 5px 0 8px 0; font-size: 18px; color: #fff; font-weight: bold;">{{ t.name }}</h3>
-            <p style="font-size: 13px; color: #ff4655; margin-bottom: 15px; font-weight: bold; display: flex; align-items: center; gap: 5px;">🎮 {{ t.game_title }}</p>
+            <h3 style="margin: 0 0 8px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
+            <p style="font-size: 13px; color: #ff4655; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 6px;">🎮 {{ t.game_title }}</p>
           </div>
 
-          <div style="display: flex; gap: 8px;">
-            <button (click)="selectTournament(t)" style="flex: 2; background: #ff4655; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">View Hub & Bracket</button>
-            <button *ngIf="userRole === 'admin'" (click)="deleteTournament(t.tournament_id)" style="flex: 1; background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px;">Delete</button>
+          <div style="display: flex; gap: 10px;">
+            <button (click)="selectTournament(t)" style="flex: 2; background: #ff4655; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 13px; box-shadow: 0 4px 12px rgba(255, 70, 85, 0.3);">View Hub & Bracket</button>
+            <button *ngIf="userRole === 'admin'" (click)="deleteTournament(t.tournament_id)" style="flex: 1; background: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">Delete</button>
           </div>
         </div>
       </div>
 
       <!-- ========================================== -->
-      <!-- SECTION 3: SELECTED TOURNAMENT HUB & BRACKET -->
+      <!-- 4. SELECTED TOURNAMENT HUB, BRACKETS & REGISTERED TEAMS DIRECTORY -->
       <!-- ========================================== -->
-      <div *ngIf="activeTournament" style="background: #0b0e14; padding: 25px; border-radius: 8px; border: 1px solid #1f2937; margin-top: 20px;">
+      <div *ngIf="activeTournament" style="background: #0b0f17; padding: 30px; border-radius: 10px; border: 1px solid #334155; margin-top: 20px;">
         
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 1px solid #1f2937; padding-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 1px solid #1e293b; padding-bottom: 20px;">
           <div>
-            <span style="font-size: 11px; color: #20b2aa; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Tournament Brackets (Single Elimination)</span>
-            <h2 style="margin: 5px 0 0 0; font-size: 24px; color: #fff; font-weight: bold;">{{ activeTournament.name }}</h2>
+            <span style="font-size: 11px; color: #10b981; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Tournament Hub & Brackets</span>
+            <h2 style="margin: 6px 0 0 0; font-size: 26px; color: #fff; font-weight: 800;">{{ activeTournament.name }}</h2>
           </div>
-          <button (click)="activeTournament = null; isManualBracketMode = false;" style="background: #1f2937; color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">← Back to Hub</button>
+          <button (click)="activeTournament = null; isManualBracketMode = false;" style="background: #1e293b; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">← Back to Hubs</button>
         </div>
 
         <!-- ADMIN BRACKET CONTROLS & MANUAL BUILDER -->
-        <div *ngIf="userRole === 'admin'" style="background: #131822; padding: 15px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #1f2937;">
+        <div *ngIf="userRole === 'admin'" style="background: #131b2e; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #1e293b;">
           
-          <div *ngIf="activeTournament.status === 'REGISTRATION_OPEN'" style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button (click)="generateBracket()" style="background: #20b2aa; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">
+          <div *ngIf="activeTournament.status === 'REGISTRATION_OPEN'" style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button (click)="generateBracket()" style="background: #10b981; color: white; border: none; padding: 11px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 13px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
               🎲 Generate Random Bracket
             </button>
-            <button (click)="openManualBracketBuilder()" style="background: #6f42c1; color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">
+            <button (click)="openManualBracketBuilder()" style="background: #8b5cf6; color: white; border: none; padding: 11px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 13px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
               🛠️ Create Manual Bracket
             </button>
           </div>
 
           <div *ngIf="activeTournament.status !== 'REGISTRATION_OPEN'">
-            <button (click)="resetBracket()" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+            <button (click)="resetBracket()" style="background: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">
               🔄 Reset Bracket & Re-open Registration
             </button>
           </div>
 
-          <!-- Manual Bracket Configuration Modal / Section -->
-          <div *ngIf="isManualBracketMode" style="background: #0b0e14; padding: 20px; border-radius: 6px; margin-top: 15px; border: 1px solid #374151;">
-            <h4 style="margin-top: 0; color: #20b2aa; font-size: 15px;">🛠️ Configure Manual Round 1 Pairings</h4>
-            <p style="color: #9ca3af; font-size: 13px; margin-bottom: 15px;">Assign registered teams to each match slot for Round 1:</p>
+          <!-- Manual Bracket Configuration Box -->
+          <div *ngIf="isManualBracketMode" style="background: #0b0f17; padding: 20px; border-radius: 8px; margin-top: 20px; border: 1px solid #334155;">
+            <h4 style="margin-top: 0; color: #38bdf8; font-size: 15px; font-weight: 700;">🛠️ Configure Manual Round 1 Pairings</h4>
+            <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">Assign registered teams to each match slot for Round 1:</p>
 
-            <div *ngFor="let match of manualMatchups; let i = index" style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-              <span style="font-weight: bold; min-width: 80px; font-size: 13px; color: #fff;">Match {{ i + 1 }}:</span>
+            <div *ngFor="let match of manualMatchups; let i = index" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+              <span style="font-weight: 700; min-width: 80px; font-size: 13px; color: #fff;">Match {{ i + 1 }}:</span>
               
-              <select [(ngModel)]="match.team_a_id" name="teamA_{{i}}" style="padding: 8px; background: #131822; color: #fff; border: 1px solid #374151; border-radius: 4px; flex: 1; font-size: 13px;">
+              <select [(ngModel)]="match.team_a_id" name="teamA_{{i}}" style="padding: 10px; background: #131b2e; color: #fff; border: 1px solid #334155; border-radius: 6px; flex: 1; font-size: 13px; outline: none;">
                 <option [ngValue]="null">-- Select Team A --</option>
                 <option *ngFor="let team of filteredTeams" [ngValue]="team.team_id">{{ team.team_name }}</option>
               </select>
 
-              <span style="font-weight: bold; color: #9ca3af; font-size: 12px;">VS</span>
+              <span style="font-weight: 800; color: #64748b; font-size: 12px;">VS</span>
 
-              <select [(ngModel)]="match.team_b_id" name="teamB_{{i}}" style="padding: 8px; background: #131822; color: #fff; border: 1px solid #374151; border-radius: 4px; flex: 1; font-size: 13px;">
+              <select [(ngModel)]="match.team_b_id" name="teamB_{{i}}" style="padding: 10px; background: #131b2e; color: #fff; border: 1px solid #334155; border-radius: 6px; flex: 1; font-size: 13px; outline: none;">
                 <option [ngValue]="null">-- BYE / None --</option>
                 <option *ngFor="let team of filteredTeams" [ngValue]="team.team_id">{{ team.team_name }}</option>
               </select>
             </div>
 
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
-              <button (click)="submitManualBracket()" style="background: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">
+            <div style="margin-top: 20px; display: flex; gap: 12px;">
+              <button (click)="submitManualBracket()" style="background: #10b981; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 13px;">
                 Confirm & Generate Bracket
               </button>
-              <button (click)="cancelManualBracket()" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+              <button (click)="cancelManualBracket()" style="background: #334155; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
                 Cancel
               </button>
             </div>
@@ -213,44 +229,44 @@
 
         </div>
 
-        <!-- Bracket Rounds Tree (Restored "FINALS" / Badge UI design) -->
-        <div *ngIf="rounds.length === 0" style="color: #888; font-style: italic; padding: 20px 0; text-align: center;">
-          Bracket has not been generated yet.
+        <!-- Bracket Rounds Tree -->
+        <div *ngIf="rounds.length === 0" style="color: #64748b; font-style: italic; padding: 30px 0; text-align: center; background: #131b2e; border-radius: 8px; border: 1px solid #1e293b;">
+          Bracket has not been generated yet for this tournament.
         </div>
 
-        <div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px;">
-          <div *ngFor="let round of rounds" style="min-width: 280px; flex: 1; background: #131822; padding: 20px; border-radius: 8px; border: 1px solid #1f2937;">
+        <div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px;" *ngIf="rounds.length > 0">
+          <div *ngFor="let round of rounds" style="min-width: 300px; flex: 1; background: #131b2e; padding: 20px; border-radius: 10px; border: 1px solid #1e293b;">
             
             <div style="text-align: center; margin-bottom: 20px;">
-              <span style="background: #115e59; color: #20b2aa; border: 1px solid #20b2aa; padding: 6px 16px; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{{ round.title }}</span>
+              <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{{ round.title }}</span>
             </div>
             
-            <div *ngFor="let match of round.matches" style="background: #0b0e14; border: 1px solid #ffb703; border-radius: 6px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            <div *ngFor="let match of round.matches" style="background: #0b0f17; border: 1px solid #f59e0b; border-radius: 8px; padding: 14px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
               
-              <div style="font-size: 11px; color: #ffb703; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: bold; text-transform: uppercase;">
+              <div style="font-size: 11px; color: #f59e0b; margin-bottom: 10px; display: flex; justify-content: space-between; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
                 <span>MATCH #{{ match.match_id }}</span>
-                <span *ngIf="match.winner_id" style="color: #20b2aa;">🏆 CHAMPIONSHIP</span>
+                <span *ngIf="match.winner_id" style="color: #10b981;">🏆 CHAMPIONSHIP</span>
               </div>
               
               <!-- Team A -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 6px; background: #131822; border-radius: 4px;">
-                <span [style.color]="match.winner_id === match.team_a_id ? '#ffb703' : '#fff'" style="font-size: 13px; font-weight: bold;">
-                  {{ match.team_a_name || 'TBD (Waiting)' }} <span *ngIf="match.winner_id === match.team_a_id" style="font-size: 11px; color: #ffb703;">👑 WINNER</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 8px 10px; background: #131b2e; border-radius: 6px;">
+                <span [style.color]="match.winner_id === match.team_a_id ? '#f59e0b' : '#fff'" style="font-size: 13px; font-weight: 700;">
+                  {{ match.team_a_name || 'TBD (Waiting)' }} <span *ngIf="match.winner_id === match.team_a_id" style="font-size: 11px; color: #f59e0b; margin-left: 4px;">👑 WINNER</span>
                 </span>
-                <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="userRole !== 'admin'" style="width: 40px; background: #0b0e14; color: #fff; border: 1px solid #374151; text-align: center; border-radius: 4px; padding: 4px; font-size: 13px; font-weight: bold;">
+                <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="userRole !== 'admin'" style="width: 44px; background: #0b0f17; color: #fff; border: 1px solid #334155; text-align: center; border-radius: 6px; padding: 5px; font-size: 13px; font-weight: 700; outline: none;">
               </div>
 
               <!-- Team B -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 6px; background: #131822; border-radius: 4px;">
-                <span [style.color]="match.winner_id === match.team_b_id ? '#ffb703' : '#fff'" style="font-size: 13px; font-weight: bold;">
-                  {{ match.team_b_name || 'TBD (Waiting)' }} <span *ngIf="match.winner_id === match.team_b_id" style="font-size: 11px; color: #ffb703;">👑 WINNER</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 10px; background: #131b2e; border-radius: 6px;">
+                <span [style.color]="match.winner_id === match.team_b_id ? '#f59e0b' : '#fff'" style="font-size: 13px; font-weight: 700;">
+                  {{ match.team_b_name || 'TBD (Waiting)' }} <span *ngIf="match.winner_id === match.team_b_id" style="font-size: 11px; color: #f59e0b; margin-left: 4px;">👑 WINNER</span>
                 </span>
-                <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="userRole !== 'admin'" style="width: 40px; background: #0b0e14; color: #fff; border: 1px solid #374151; text-align: center; border-radius: 4px; padding: 4px; font-size: 13px; font-weight: bold;">
+                <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="userRole !== 'admin'" style="width: 44px; background: #0b0f17; color: #fff; border: 1px solid #334155; text-align: center; border-radius: 6px; padding: 5px; font-size: 13px; font-weight: 700; outline: none;">
               </div>
 
               <!-- Admin Save Score -->
               <div *ngIf="userRole === 'admin' && match.team_a_id && match.team_b_id">
-                <button (click)="updateScore(match.match_id, match.tempScoreA, match.tempScoreB, match.team_a_id, match.team_b_id)" style="width: 100%; background: #20b2aa; color: white; border: none; padding: 7px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;">
+                <button (click)="updateScore(match.match_id, match.tempScoreA, match.tempScoreB, match.team_a_id, match.team_b_id)" style="width: 100%; background: #10b981; color: white; border: none; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
                   Save Score & Advance
                 </button>
               </div>
@@ -258,22 +274,22 @@
           </div>
         </div>
 
-        <!-- Registered Teams Directory (Restored Card Grid Design) -->
-        <div style="margin-top: 35px; border-top: 1px solid #1f2937; padding-top: 25px;">
-          <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: bold;">Registered Teams Directory</h3>
+        <!-- Registered Teams Directory -->
+        <div style="margin-top: 40px; border-top: 1px solid #1e293b; padding-top: 25px;">
+          <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Registered Teams Directory</h3>
           
-          <div *ngIf="filteredTeams.length === 0" style="color: #888; font-style: italic; font-size: 13px;">
+          <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-style: italic; font-size: 13px; background: #131b2e; padding: 20px; border-radius: 8px; border: 1px solid #1e293b;">
             No teams registered for this tournament yet.
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px;">
-            <div *ngFor="let team of filteredTeams" style="background: #131822; padding: 20px; border-radius: 8px; border: 1px solid #1f2937; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-              <strong style="font-size: 16px; color: #fff; display: block; margin-bottom: 6px; font-weight: bold;">{{ team.team_name }}</strong>
-              <span style="font-size: 13px; color: #9ca3af; display: block; margin-bottom: 15px;">Captain: <strong style="color: #fff;">{{ team.captain_riot_id }}</strong></span>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            <div *ngFor="let team of filteredTeams" style="background: #131b2e; padding: 20px; border-radius: 10px; border: 1px solid #1e293b; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
+              <strong style="font-size: 16px; color: #fff; display: block; margin-bottom: 6px; font-weight: 700;">{{ team.team_name }}</strong>
+              <span style="font-size: 13px; color: #94a3b8; display: block; margin-bottom: 18px;">Captain: <strong style="color: #fff;">{{ team.captain_riot_id }}</strong></span>
               
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <a (click)="openTeamModal(team.team_id)" style="color: #20b2aa; font-size: 13px; font-weight: bold; cursor: pointer; text-decoration: none;">View Roster →</a>
-                <button *ngIf="userRole === 'admin'" (click)="deleteTeam(team.team_id)" style="margin-left: auto; background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Delete</button>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <a (click)="openTeamModal(team.team_id)" style="color: #38bdf8; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none;">View Roster →</a>
+                <button *ngIf="userRole === 'admin'" (click)="deleteTeam(team.team_id)" style="margin-left: auto; background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
               </div>
             </div>
           </div>
@@ -288,18 +304,18 @@
   <!-- ========================================== -->
   <!-- TEAM ROSTER MODAL POPUP -->
   <!-- ========================================== -->
-  <div *ngIf="selectedTeamRoster" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-    <div style="background: #131822; padding: 30px; border-radius: 8px; width: 400px; border: 1px solid #1f2937; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-      <h3 style="margin-top: 0; color: #fff; font-size: 18px; font-weight: bold;">📋 Team Roster Details</h3>
-      <h4 style="color: #20b2aa; margin: 5px 0 20px 0; font-size: 16px; font-weight: bold;">{{ selectedTeamRoster.team.name }}</h4>
+  <div *ngIf="selectedTeamRoster" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px);">
+    <div style="background: #131b2e; padding: 35px; border-radius: 12px; width: 420px; border: 1px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);">
+      <h3 style="margin-top: 0; color: #fff; font-size: 20px; font-weight: 800;">📋 Team Roster Details</h3>
+      <h4 style="color: #10b981; margin: 6px 0 20px 0; font-size: 16px; font-weight: 700;">{{ selectedTeamRoster.team.name }}</h4>
 
-      <ul style="list-style: disc; padding-left: 20px; margin-bottom: 25px; color: #d1d5db; font-size: 14px;">
-        <li *ngFor="let player of selectedTeamRoster.roster" style="margin-bottom: 8px;">
-          <strong style="color: #fff;">{{ player.riot_id }}</strong> <span style="color: #9ca3af; font-size: 12px;">({{ player.email }})</span>
+      <ul style="list-style: disc; padding-left: 20px; margin-bottom: 30px; color: #cbd5e1; font-size: 14px;">
+        <li *ngFor="let player of selectedTeamRoster.roster" style="margin-bottom: 10px;">
+          <strong style="color: #fff;">{{ player.riot_id }}</strong> <span style="color: #64748b; font-size: 12px;">({{ player.email }})</span>
         </li>
       </ul>
 
-      <button (click)="closeTeamModal()" style="width: 100%; background: #374151; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">Close</button>
+      <button (click)="closeTeamModal()" style="width: 100%; background: #334155; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 14px; transition: background 0.2s;">Close</button>
     </div>
   </div>
 
