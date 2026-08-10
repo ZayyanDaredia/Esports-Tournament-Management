@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Subscription, timer } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -31,17 +30,14 @@ export class App implements OnInit, OnDestroy {
   activeTournament: any = null;
   selectedTeamRoster: any = null;
 
-  // Manual Bracket Builder State
   isManualBracketMode: boolean = false;
   manualMatchups: { team_a_id: number | null, team_b_id: number | null }[] = [];
 
-  // Filter & Search state
   searchQuery: string = '';
   selectedGame: string = 'ALL';
   selectedStatus: string = 'ALL';
   tournamentView: 'all' | 'my' = 'all';
 
-  // User Roster Registration Form state
   regTourneyId: string = '';
   regTeamName: string = '';
   regCap: string = '';
@@ -53,7 +49,6 @@ export class App implements OnInit, OnDestroy {
   regSub2: string = '';
   submittedAttempt: boolean = false;
 
-  // Admin Tournament Creation Form state
   adminTourneyName: string = '';
   adminTourneyGame: string = '';
   adminTourneySubmitAttempt: boolean = false;
@@ -75,24 +70,26 @@ export class App implements OnInit, OnDestroy {
     this.fetchTournaments();
     this.fetchTeams();
 
-    this.pollSub = timer(4000, 4000).pipe(
-      switchMap(() => this.http.get<any[]>('/api/tournaments'))
-    ).subscribe({
-      next: (tournamentsData) => {
-        this.tournaments = tournamentsData;
-        this.updateVisibleTournaments();
-
-        this.http.get<any[]>('/api/teams').subscribe(teamsData => {
-          this.teams = teamsData;
-          if (this.activeTournament) {
-            this.filteredTeams = this.teams.filter(t => t.tournament_id === this.activeTournament.tournament_id);
-            this.pollActiveTournamentMatchesQuietly();
-          }
+    this.pollSub = timer(4000, 4000).subscribe(() => {
+      if (this.isManualBracketMode) return;
+      
+      this.http.get<any[]>('/api/tournaments').subscribe({
+        next: (tournamentsData) => {
+          this.tournaments = tournamentsData;
           this.updateVisibleTournaments();
-          this.cdr.detectChanges();
-        });
-      },
-      error: (err) => console.error('Polling error:', err)
+
+          this.http.get<any[]>('/api/teams').subscribe(teamsData => {
+            this.teams = teamsData;
+            if (this.activeTournament) {
+              this.filteredTeams = this.teams.filter(t => t.tournament_id === this.activeTournament.tournament_id);
+              this.pollActiveTournamentMatchesQuietly();
+            }
+            this.updateVisibleTournaments();
+            this.cdr.detectChanges();
+          });
+        },
+        error: (err) => console.error('Polling error:', err)
+      });
     });
   }
 
@@ -217,7 +214,8 @@ export class App implements OnInit, OnDestroy {
         this.matches = (data as any[]).map(m => ({
           ...m,
           tempScoreA: m.score_a !== null ? m.score_a : 0,
-          tempScoreB: m.score_b !== null ? m.score_b : 0
+          tempScoreB: m.score_b !== null ? m.score_b : 0,
+          isEditing: m.winner_id === null
         }));
 
         this.processRoundsData();
@@ -235,7 +233,8 @@ export class App implements OnInit, OnDestroy {
           return {
             ...m,
             tempScoreA: existing && existing.tempScoreA !== undefined ? existing.tempScoreA : (m.score_a !== null ? m.score_a : 0),
-            tempScoreB: existing && existing.tempScoreB !== undefined ? existing.tempScoreB : (m.score_b !== null ? m.score_b : 0)
+            tempScoreB: existing && existing.tempScoreB !== undefined ? existing.tempScoreB : (m.score_b !== null ? m.score_b : 0),
+            isEditing: existing ? existing.isEditing : (m.winner_id === null)
           };
         });
 
@@ -258,15 +257,15 @@ export class App implements OnInit, OnDestroy {
       const distanceFromEnd = totalRounds - r;
       let title = `Round ${r}`;
       if (distanceFromEnd === 0) {
-        title = 'Finals';
+        title = '👑 FINALS';
       } else if (distanceFromEnd === 1) {
-        title = 'Semi-finals';
+        title = 'SEMI-FINALS';
       } else if (distanceFromEnd === 2) {
-        title = 'Quarter-finals';
+        title = 'QUARTER-FINALS';
       } else if (distanceFromEnd === 3) {
-        title = 'Round of 16';
+        title = 'ROUND OF 16';
       } else if (distanceFromEnd === 4) {
-        title = 'Round of 32';
+        title = 'ROUND OF 32';
       }
 
       return {
@@ -366,17 +365,26 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
-  updateScore(matchId: number, scoreA: any, scoreB: any, teamAId: number, teamBId: number) {
-    const a = parseInt(scoreA), b = parseInt(scoreB);
+  updateScore(match: any) {
+    const a = parseInt(match.tempScoreA), b = parseInt(match.tempScoreB);
     if (isNaN(a) || isNaN(b)) return;
     
-    this.http.put(`/api/matches/${matchId}`, { score_a: a, score_b: b, winner_id: a > b ? teamAId : teamBId }, this.getAuthHeaders()).subscribe({
+    let winnerId = null;
+    if (a > b) winnerId = match.team_a_id;
+    else if (b > a) winnerId = match.team_b_id;
+
+    this.http.put(`/api/matches/${match.match_id}`, { score_a: a, score_b: b, winner_id: winnerId }, this.getAuthHeaders()).subscribe({
       next: () => {
+        match.isEditing = false;
         this.selectTournament(this.activeTournament);
         this.fetchTournaments();
       },
       error: (err) => alert(err.error.error || 'Failed to update score')
     });
+  }
+
+  enableEditScore(match: any) {
+    match.isEditing = true;
   }
 
   deleteTeam(id: number) {

@@ -106,7 +106,7 @@
         <button (click)="registerFullTeam()" style="width: 100%; background: #ef4444; color: #ffffff; border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); transition: 0.2s;">Submit Roster</button>
       </div>
 
-      <!-- 3A. USER: TOURNAMENTS & ACCORDION HUB (CARD GRID UI) -->
+      <!-- 3A. USER: TOURNAMENTS & ACCORDION HUB -->
       <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
@@ -122,7 +122,6 @@
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
           <input type="text" [(ngModel)]="searchQuery" placeholder="Search tournaments..." style="flex: 2; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid transparent; color: #fff; border-radius: 12px; font-size: 14px; outline: none;">
           
-          <!-- Dropdown Game Menu (Styled) -->
           <select [(ngModel)]="selectedGame" 
                   [style.color]="selectedGame === 'Valorant' ? '#ff4655' : (selectedGame === 'CS2' ? '#eab308' : '#fff')"
                   style="padding: 12px 40px 12px 16px; background-color: rgba(255,255,255,0.03); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px auto; border: 1px solid transparent; border-radius: 12px; font-size: 14px; outline: none; appearance: none; font-weight: 600; cursor: pointer; transition: color 0.2s;">
@@ -131,7 +130,6 @@
             <option value="CS2" style="color: #eab308;">CS2</option>
           </select>
 
-          <!-- Dropdown Status Menu (Styled & Default Placeholder colored) -->
           <select [(ngModel)]="selectedStatus" 
                   [style.color]="selectedStatus === 'ALL' ? '#94a3b8' : (selectedStatus === 'REGISTRATION_OPEN' ? '#38bdf8' : (selectedStatus === 'ONGOING' ? '#10b981' : '#64748b'))"
                   style="padding: 12px 40px 12px 16px; background-color: rgba(255,255,255,0.03); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px auto; border: 1px solid transparent; border-radius: 12px; font-size: 14px; outline: none; appearance: none; font-weight: 600; cursor: pointer; transition: color 0.2s;">
@@ -146,7 +144,6 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
           <div *ngFor="let t of filteredTournaments; trackBy: trackByTourney" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
             
-            <!-- Card Header (Clickable Box - DYNAMIC BORDER COLOR) -->
             <div (click)="toggleTournament(t)" 
                  [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b'))"
                  style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: transform 0.2s, background 0.2s; min-height: 120px;">
@@ -159,33 +156,58 @@
                 <p style="margin: 0; font-size: 13px; font-weight: 600;" [style.color]="t.game_title === 'Valorant' ? '#ff4655' : (t.game_title === 'CS2' ? '#eab308' : '#94a3b8')">🎮 {{ t.game_title }}</p>
               </div>
 
-              <!-- Chevron Area (No Delete Button for Users) -->
               <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 20px;">
                 <div [style.transform]="activeTournament?.tournament_id === t.tournament_id ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.3s; color: #64748b; font-size: 16px; pointer-events: none;">▼</div>
               </div>
             </div>
 
-            <!-- Card Expanded Hub Content -->
+            <!-- User Expanded Hub Content -->
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
               <div *ngIf="rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
-              <div style="display: flex; gap: 30px; overflow-x: auto; padding-bottom: 20px;">
-                <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 280px; flex: 1;">
-                  <div style="margin-bottom: 25px;"><span style="color: #94a3b8; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">{{ round.title }}</span></div>
-                  <div *ngFor="let match of round.matches; trackBy: trackByMatch" style="background: #1c2333; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); position: relative; border: 1px solid rgba(255,255,255,0.02);">
-                    <div style="font-size: 11px; color: #64748b; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 600; letter-spacing: 0.5px;">
-                      <span>MATCH #{{ match.match_id }}</span><span *ngIf="match.winner_id" style="color: #00d28a;">COMPLETED</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                      <span [style.color]="match.winner_id === match.team_a_id ? '#fff' : (match.team_a_name ? '#94a3b8' : '#475569')" style="font-size: 14px; font-weight: 600;">{{ match.team_a_name || 'TBD' }} <span *ngIf="match.winner_id === match.team_a_id" style="font-size: 12px; margin-left: 6px;">👑</span></span>
-                      <input type="number" [(ngModel)]="match.tempScoreA" disabled style="width: 35px; background: #0b0f19; color: #fff; border: none; text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 600; outline: none;">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                      <span [style.color]="match.winner_id === match.team_b_id ? '#fff' : (match.team_b_name ? '#94a3b8' : '#475569')" style="font-size: 14px; font-weight: 600;">{{ match.team_b_name || 'TBD' }} <span *ngIf="match.winner_id === match.team_b_id" style="font-size: 12px; margin-left: 6px;">👑</span></span>
-                      <input type="number" [(ngModel)]="match.tempScoreB" disabled style="width: 35px; background: #0b0f19; color: #fff; border: none; text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 600; outline: none;">
+              
+              <div style="display: flex; gap: 40px; overflow-x: auto; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+                <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
+                  
+                  <div style="text-align: center; margin-bottom: 25px;">
+                    <span style="color: #38bdf8; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2);">
+                      {{ round.title }}
+                    </span>
+                  </div>
+
+                  <div style="display: flex; flex-direction: column; justify-content: space-around; flex-grow: 1; gap: 20px;">
+                    <div *ngFor="let match of round.matches; trackBy: trackByMatch" 
+                         [style.margin-top]="round.roundNumber > 1 ? (round.roundNumber === 2 ? '40px' : '90px') : '0px'"
+                         style="background: #1c2333; border-radius: 16px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.02);">
+                      
+                      <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
+                        <span>MATCH #{{ match.match_id }}</span>
+                        <span *ngIf="match.winner_id" style="color: #10b981;">COMPLETED</span>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span [style.color]="match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff')"
+                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
+                              style="font-size: 14px; font-weight: 700;">
+                          {{ match.team_a_name || '' }}
+                        </span>
+                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_a }}</span>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span [style.color]="match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff')"
+                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
+                              style="font-size: 14px; font-weight: 700;">
+                          {{ match.team_b_name || '' }}
+                        </span>
+                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_b }}</span>
+                      </div>
+
                     </div>
                   </div>
+
                 </div>
               </div>
+
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
                 <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
@@ -196,6 +218,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -204,7 +227,7 @@
 
 
     <!-- ========================================== -->
-    <!-- SECTION: ADMIN ACCOUNT VIEWS (UNTOUCHED) -->
+    <!-- SECTION: ADMIN ACCOUNT VIEWS -->
     <!-- ========================================== -->
     <div *ngIf="userRole === 'admin'">
       
@@ -243,16 +266,13 @@
       <!-- 3B. ADMIN: TOURNAMENTS SECTION -->
       <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
         
-        <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
           <h2 style="margin: 0; font-size: 20px; color: #fff; font-weight: 700;">Tournaments</h2>
         </div>
 
-        <!-- Filters & Search Toolbar -->
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;">
           <input type="text" [(ngModel)]="searchQuery" placeholder="Search tournaments..." style="flex: 2; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid transparent; color: #fff; border-radius: 12px; font-size: 14px; outline: none;">
           
-          <!-- Dropdown Game Menu -->
           <select [(ngModel)]="selectedGame" 
                   [style.color]="selectedGame === 'Valorant' ? '#ff4655' : (selectedGame === 'CS2' ? '#eab308' : '#fff')"
                   style="padding: 12px 40px 12px 16px; background-color: rgba(255,255,255,0.03); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px auto; border: 1px solid transparent; border-radius: 12px; font-size: 14px; outline: none; appearance: none; font-weight: 600; cursor: pointer; transition: color 0.2s;">
@@ -261,7 +281,6 @@
             <option value="CS2" style="color: #eab308;">CS2</option>
           </select>
 
-          <!-- Dropdown Status Menu -->
           <select [(ngModel)]="selectedStatus" 
                   [style.color]="selectedStatus === 'REGISTRATION_OPEN' ? '#38bdf8' : (selectedStatus === 'ONGOING' ? '#10b981' : (selectedStatus === 'COMPLETED' ? '#64748b' : '#fff'))"
                   style="padding: 12px 40px 12px 16px; background-color: rgba(255,255,255,0.03); background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 14px center; background-size: 12px auto; border: 1px solid transparent; border-radius: 12px; font-size: 14px; outline: none; appearance: none; font-weight: 600; cursor: pointer; transition: color 0.2s;">
@@ -276,7 +295,6 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
           <div *ngFor="let t of filteredTournaments; trackBy: trackByTourney" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
             
-            <!-- Card Header (Clickable Box - DYNAMIC BORDER COLOR) -->
             <div (click)="toggleTournament(t)" 
                  [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b'))"
                  style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: transform 0.2s, background 0.2s; min-height: 120px;">
@@ -289,17 +307,15 @@
                 <p style="margin: 0; font-size: 13px; font-weight: 600;" [style.color]="t.game_title === 'Valorant' ? '#ff4655' : (t.game_title === 'CS2' ? '#eab308' : '#94a3b8')">🎮 {{ t.game_title }}</p>
               </div>
 
-              <!-- Delete Button & Chevron -->
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                 <button (click)="deleteTournament(t.tournament_id); $event.stopPropagation()" style="background: transparent; border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
                 <div [style.transform]="activeTournament?.tournament_id === t.tournament_id ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.3s; color: #64748b; font-size: 16px; pointer-events: none;">▼</div>
               </div>
             </div>
 
-            <!-- Card Expanded Hub Content -->
+            <!-- Expanded Hub & Bracket Tree (Admin View with Editable Scores & Toggleable Save/Edit Buttons) -->
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
               
-              <!-- ADMIN BRACKET CONTROLS -->
               <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; margin-bottom: 40px;">
                 <div *ngIf="activeTournament.status === 'REGISTRATION_OPEN'" style="display: flex; gap: 15px; flex-wrap: wrap;">
                   <button (click)="generateBracket()" style="background: #fff; color: #0b0f19; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px;">Auto-Generate Bracket</button>
@@ -309,7 +325,6 @@
                   <button (click)="resetBracket()" style="background: transparent; border: 1px solid #f43f5e; color: #f43f5e; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600;">Reset Bracket & Re-open</button>
                 </div>
 
-                <!-- Manual Bracket Setup Form -->
                 <div *ngIf="isManualBracketMode" style="margin-top: 25px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.05);">
                   <h4 style="margin: 0 0 20px 0; color: #fff; font-size: 16px; font-weight: 600;">Configure Round 1 Pairings</h4>
                   <div *ngFor="let match of manualMatchups; let i = index; trackBy: trackByIndex" style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
@@ -331,52 +346,68 @@
                 </div>
               </div>
 
-              <!-- Bracket UI -->
+              <!-- Bracket UI Tree -->
               <div *ngIf="rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
-              <div style="display: flex; gap: 30px; overflow-x: auto; padding-bottom: 20px;">
-                <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 280px; flex: 1;">
-                  <div style="margin-bottom: 25px;">
-                    <span style="color: #94a3b8; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">{{ round.title }}</span>
+              
+              <div style="display: flex; gap: 40px; overflow-x: auto; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+                <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
+                  
+                  <div style="text-align: center; margin-bottom: 25px;">
+                    <span style="color: #38bdf8; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2);">
+                      {{ round.title }}
+                    </span>
                   </div>
-                  <div *ngFor="let match of round.matches; trackBy: trackByMatch" style="background: #1c2333; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); position: relative; border: 1px solid rgba(255,255,255,0.02);">
-                    <div style="font-size: 11px; color: #64748b; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 600; letter-spacing: 0.5px;">
-                      <span>MATCH #{{ match.match_id }}</span><span *ngIf="match.winner_id" style="color: #00d28a;">COMPLETED</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                      <span [style.color]="match.winner_id === match.team_a_id ? '#fff' : (match.team_a_name ? '#94a3b8' : '#475569')" style="font-size: 14px; font-weight: 600;">
-                        {{ match.team_a_name || 'TBD' }} <span *ngIf="match.winner_id === match.team_a_id" style="font-size: 12px; margin-left: 6px;">👑</span>
-                      </span>
-                      <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="userRole !== 'admin'" style="width: 35px; background: #0b0f19; color: #fff; border: none; text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 600; outline: none;">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                      <span [style.color]="match.winner_id === match.team_b_id ? '#fff' : (match.team_b_name ? '#94a3b8' : '#475569')" style="font-size: 14px; font-weight: 600;">
-                        {{ match.team_b_name || 'TBD' }} <span *ngIf="match.winner_id === match.team_b_id" style="font-size: 12px; margin-left: 6px;">👑</span>
-                      </span>
-                      <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="userRole !== 'admin'" style="width: 35px; background: #0b0f19; color: #fff; border: none; text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 600; outline: none;">
-                    </div>
-                    <div *ngIf="userRole === 'admin' && match.team_a_id && match.team_b_id">
-                      <button (click)="updateScore(match.match_id, match.tempScoreA, match.tempScoreB, match.team_a_id, match.team_b_id)" style="width: 100%; background: rgba(255,255,255,0.05); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s;">
-                        Update Score
-                      </button>
+
+                  <div style="display: flex; flex-direction: column; justify-content: space-around; flex-grow: 1; gap: 20px;">
+                    <div *ngFor="let match of round.matches; trackBy: trackByMatch" 
+                         [style.margin-top]="round.roundNumber > 1 ? (round.roundNumber === 2 ? '40px' : '90px') : '0px'"
+                         style="background: #1c2333; border-radius: 16px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.02);">
+                      
+                      <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
+                        <span>MATCH #{{ match.match_id }}</span>
+                        <span *ngIf="match.winner_id" style="color: #10b981;">COMPLETED</span>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <span [style.color]="match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff')"
+                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
+                              style="font-size: 14px; font-weight: 700;">
+                          {{ match.team_a_name || '' }}
+                        </span>
+                        <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="!match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span [style.color]="match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff')"
+                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
+                              style="font-size: 14px; font-weight: 700;">
+                          {{ match.team_b_name || '' }}
+                        </span>
+                        <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="!match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                      </div>
+
+                      <div *ngIf="match.team_a_id && match.team_b_id">
+                        <button *ngIf="match.isEditing" (click)="updateScore(match)" style="width: 100%; background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                          Update Score
+                        </button>
+                        <button *ngIf="!match.isEditing" (click)="enableEditScore(match)" style="width: 100%; background: #334155; color: #cbd5e1; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                          Edit Score
+                        </button>
+                      </div>
+
                     </div>
                   </div>
+
                 </div>
               </div>
 
-              <!-- Registered Teams Directory (Sleek List) -->
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
                 <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
-                    <div>
-                      <strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong>
-                      <span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span>
-                    </div>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                      <a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster</a>
-                      <button *ngIf="userRole === 'admin'" (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button>
-                    </div>
+                    <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
+                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster</a><button (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button></div>
                   </div>
                 </div>
               </div>
