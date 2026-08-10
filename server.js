@@ -393,7 +393,12 @@ app.get('/api/tournaments/:id/matches', async (req, res) => {
             ORDER BY m.round_number ASC, m.match_id ASC
         `;
         const [matches] = await db.execute(query, [tournamentId]);
-        res.status(200).json(matches);
+        // FIX: Map a local display index starting from 1 for each specific tournament
+        const localizedMatches = matches.map((m, idx) => ({
+            ...m,
+            display_id: idx + 1
+        }));
+        res.status(200).json(localizedMatches);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
@@ -418,7 +423,6 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         const tournamentId = currentMatch.tournament_id;
         const nextMatchId = currentMatch.next_match_id;
 
-        // FIX: Allow winner_id for bye matches where team_b_id can be null
         const isValidParticipant = (winner_id === currentMatch.team_a_id) || (winner_id === currentMatch.team_b_id);
         if (!isValidParticipant) {
             await connection.rollback();
