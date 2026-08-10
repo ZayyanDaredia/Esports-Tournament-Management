@@ -41,7 +41,7 @@ export class App implements OnInit, OnDestroy {
   selectedStatus: string = 'ALL';
   tournamentView: 'all' | 'my' = 'all';
 
-  // Roster form model properties & validation flag
+  // User Roster Registration Form state
   regTourneyId: string = '';
   regTeamName: string = '';
   regCap: string = '';
@@ -52,6 +52,11 @@ export class App implements OnInit, OnDestroy {
   regSub1: string = '';
   regSub2: string = '';
   submittedAttempt: boolean = false;
+
+  // Admin Tournament Creation Form state
+  adminTourneyName: string = '';
+  adminTourneyGame: string = '';
+  adminTourneySubmitAttempt: boolean = false;
 
   private pollSub?: Subscription;
 
@@ -67,11 +72,9 @@ export class App implements OnInit, OnDestroy {
       this.userId = savedUserId ? parseInt(savedUserId) : null;
     }
     
-    // Initial fetch
     this.fetchTournaments();
     this.fetchTeams();
 
-    // Real-time background polling every 4 seconds for tournaments, teams, and active bracket matches
     this.pollSub = timer(4000, 4000).pipe(
       switchMap(() => this.http.get<any[]>('/api/tournaments'))
     ).subscribe({
@@ -195,7 +198,6 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
-  // Toggles the tournament hub panel open/closed
   toggleTournament(tourney: any) {
     if (this.activeTournament && this.activeTournament.tournament_id === tourney.tournament_id) {
       this.activeTournament = null;
@@ -275,14 +277,34 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Deprecated usage fallback if old template code remains
   createTournament(name: string, game: string) {
-    if (!name || !name.trim()) {
-      alert("Tournament Name is required");
-      return;
-    }
+    if (!name || !name.trim()) return;
     this.http.post('/api/tournaments', { name, game_title: game }, this.getAuthHeaders()).subscribe({
       next: () => { this.fetchTournaments(); },
       error: (err) => alert(err.error.error || 'Failed')
+    });
+  }
+
+  // New validation method for Admin Box
+  submitAdminTournament() {
+    this.adminTourneySubmitAttempt = true;
+
+    if (!this.adminTourneyName || !this.adminTourneyName.trim() || !this.adminTourneyGame) {
+      return; 
+    }
+
+    this.http.post('/api/tournaments', { 
+      name: this.adminTourneyName.trim(), 
+      game_title: this.adminTourneyGame 
+    }, this.getAuthHeaders()).subscribe({
+      next: () => { 
+        this.adminTourneySubmitAttempt = false;
+        this.adminTourneyName = '';
+        this.adminTourneyGame = '';
+        this.fetchTournaments(); 
+      },
+      error: (err) => alert(err.error.error || 'Failed to create tournament')
     });
   }
 
