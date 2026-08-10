@@ -94,9 +94,7 @@ export class App implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.pollSub) {
-      this.pollSub.unsubscribe();
-    }
+    if (this.pollSub) this.pollSub.unsubscribe();
   }
 
   getAuthHeaders() {
@@ -124,10 +122,7 @@ export class App implements OnInit, OnDestroy {
 
   signup(user: string, pass: string) {
     this.http.post('/api/signup', { username: user, password: pass }).subscribe({
-      next: () => {
-        this.authMode = 'login';
-        this.cdr.detectChanges();
-      },
+      next: () => { this.authMode = 'login'; this.cdr.detectChanges(); },
       error: (err) => alert(err.error.error || 'Signup failed')
     });
   }
@@ -278,10 +273,7 @@ export class App implements OnInit, OnDestroy {
 
   submitAdminTournament() {
     this.adminTourneySubmitAttempt = true;
-
-    if (!this.adminTourneyName || !this.adminTourneyName.trim() || !this.adminTourneyGame) {
-      return; 
-    }
+    if (!this.adminTourneyName || !this.adminTourneyName.trim() || !this.adminTourneyGame) return; 
 
     this.http.post('/api/tournaments', { 
       name: this.adminTourneyName.trim(), 
@@ -332,7 +324,6 @@ export class App implements OnInit, OnDestroy {
 
   submitManualBracket() {
     if (!this.activeTournament) return;
-
     for (let m of this.manualMatchups) {
       if (!m.team_a_id) {
         alert('Every match must have at least a Team A assigned.');
@@ -370,8 +361,13 @@ export class App implements OnInit, OnDestroy {
     if (isNaN(a) || isNaN(b)) return;
     
     let winnerId = null;
-    if (a > b) winnerId = match.team_a_id;
-    else if (b > a) winnerId = match.team_b_id;
+    if (!match.team_b_id) {
+      winnerId = match.team_a_id; // Bye matches automatically advance Team A
+    } else {
+      if (a > b) winnerId = match.team_a_id;
+      else if (b > a) winnerId = match.team_b_id;
+      else winnerId = match.team_a_id;
+    }
 
     this.http.put(`/api/matches/${match.match_id}`, { score_a: a, score_b: b, winner_id: winnerId }, this.getAuthHeaders()).subscribe({
       next: () => {
@@ -414,10 +410,7 @@ export class App implements OnInit, OnDestroy {
 
   registerFullTeam() {
     this.submittedAttempt = true;
-
-    if (!this.regTourneyId || !this.regTeamName || !this.regTeamName.trim() || !this.regCap || !this.regCap.trim() || !this.regP2 || !this.regP2.trim() || !this.regP3 || !this.regP3.trim() || !this.regP4 || !this.regP4.trim() || !this.regP5 || !this.regP5.trim()) {
-      return; 
-    }
+    if (!this.regTourneyId || !this.regTeamName || !this.regTeamName.trim() || !this.regCap || !this.regCap.trim() || !this.regP2 || !this.regP2.trim() || !this.regP3 || !this.regP3.trim() || !this.regP4 || !this.regP4.trim() || !this.regP5 || !this.regP5.trim()) return; 
 
     const payload = {
       tournament_id: parseInt(this.regTourneyId),
@@ -460,9 +453,6 @@ export class App implements OnInit, OnDestroy {
     this.selectedTeamRoster = null;
   }
 
-  // ==========================================
-  // TRACK-BY FUNCTIONS (PREVENTS UI FLICKER/CLOSING)
-  // ==========================================
   trackByTourney(index: number, item: any) { return item.tournament_id; }
   trackByTeam(index: number, item: any) { return item.team_id; }
   trackByRound(index: number, item: any) { return item.roundNumber; }

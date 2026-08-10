@@ -150,7 +150,6 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
             const teamA = shuffledTeams[i].team_id;
             const teamB = (i + 1 < shuffledTeams.length) ? shuffledTeams[i + 1].team_id : null;
 
-            // FIX: Bye matches now start with score 0-0 and winner_id null so they are fully editable
             const [mRes] = await connection.execute(
                 'INSERT INTO Matches (tournament_id, round_number, team_a_id, team_b_id, winner_id, score_a, score_b) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [tournamentId, roundNum, teamA, teamB, null, 0, 0]
@@ -213,7 +212,6 @@ app.post('/api/tournaments/:id/generate-manual-bracket', verifyAdmin, async (req
             const teamA = pair.team_a_id || null;
             const teamB = pair.team_b_id !== undefined ? pair.team_b_id : null;
 
-            // FIX: Manual bye matches also start with score 0-0 and winner_id null to ensure full editability
             const [mRes] = await connection.execute(
                 'INSERT INTO Matches (tournament_id, round_number, team_a_id, team_b_id, winner_id, score_a, score_b) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [tournamentId, roundNum, teamA, teamB, null, 0, 0]
@@ -420,7 +418,9 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         const tournamentId = currentMatch.tournament_id;
         const nextMatchId = currentMatch.next_match_id;
 
-        if (winner_id !== currentMatch.team_a_id && winner_id !== currentMatch.team_b_id) {
+        // FIX: Allow winner_id for bye matches where team_b_id can be null
+        const isValidParticipant = (winner_id === currentMatch.team_a_id) || (winner_id === currentMatch.team_b_id);
+        if (!isValidParticipant) {
             await connection.rollback();
             return res.status(400).json({ error: 'Winner must be a participant' });
         }

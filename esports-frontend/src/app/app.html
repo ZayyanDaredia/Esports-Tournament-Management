@@ -386,7 +386,8 @@
                         <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="!match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
                       </div>
 
-                      <div *ngIf="match.team_a_id && match.team_b_id">
+                      <!-- FIX: Button condition updated to match.team_a_id so Bye matches now show Update/Edit buttons -->
+                      <div *ngIf="match.team_a_id">
                         <button *ngIf="match.isEditing" (click)="updateScore(match)" style="width: 100%; background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
                           Update Score
                         </button>
