@@ -12,6 +12,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ==========================================
+// ANTI-CACHE MIDDLEWARE (FIXES STALE DATA)
+// ==========================================
 app.use((req, res, next) => {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -27,6 +30,9 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
+// ==========================================
+// MIDDLEWARE
+// ==========================================
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -50,6 +56,9 @@ const verifyAdmin = (req, res, next) => {
     });
 };
 
+// ==========================================
+// AUTHENTICATION
+// ==========================================
 app.post('/api/signup', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
@@ -93,6 +102,9 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// ==========================================
+// TOURNAMENTS
+// ==========================================
 app.get('/api/tournaments', async (req, res) => {
     try {
         const [tournaments] = await db.execute('SELECT * FROM Tournaments ORDER BY tournament_id DESC');
@@ -121,6 +133,7 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
 
     try {
         await connection.beginTransaction();
+        
         await connection.execute('DELETE FROM Matches WHERE tournament_id = ?', [tournamentId]);
 
         const [teams] = await connection.execute('SELECT team_id FROM Teams WHERE tournament_id = ?', [tournamentId]);
@@ -167,9 +180,11 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
 
         await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['ONGOING', tournamentId]);
         await connection.commit();
+
         res.status(201).json({ message: 'Single elimination bracket generated successfully!' });
     } catch (error) {
         await connection.rollback();
+        console.error(error);
         res.status(500).json({ error: 'Internal server error' });
     } finally {
         connection.release();
@@ -187,6 +202,7 @@ app.post('/api/tournaments/:id/generate-manual-bracket', verifyAdmin, async (req
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
+        
         await connection.execute('DELETE FROM Matches WHERE tournament_id = ?', [tournamentId]);
 
         let roundNum = 1;
@@ -226,9 +242,11 @@ app.post('/api/tournaments/:id/generate-manual-bracket', verifyAdmin, async (req
 
         await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['ONGOING', tournamentId]);
         await connection.commit();
+
         res.status(201).json({ message: 'Manual elimination bracket generated successfully!' });
     } catch (error) {
         await connection.rollback();
+        console.error('Manual bracket error:', error);
         res.status(500).json({ error: 'Internal server error' });
     } finally {
         connection.release();
@@ -243,9 +261,11 @@ app.delete('/api/tournaments/:id/bracket', verifyAdmin, async (req, res) => {
         await connection.query('DELETE FROM Matches WHERE tournament_id = ?', [tournamentId]);
         await connection.query('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['REGISTRATION_OPEN', tournamentId]);
         await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+        
         res.status(200).json({ message: 'Bracket reset successfully' });
     } catch (error) {
         await connection.query('SET FOREIGN_KEY_CHECKS = 1').catch(() => {});
+        console.error('Reset bracket error:', error);
         res.status(500).json({ error: error.message || 'Failed to reset bracket' });
     } finally {
         connection.release();
@@ -274,6 +294,9 @@ app.delete('/api/tournaments/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// ==========================================
+// TEAMS & MATCHES
+// ==========================================
 app.get('/api/teams', async (req, res) => {
     try {
         const [teams] = await db.execute(`
@@ -293,9 +316,9 @@ app.get('/api/teams/:id/roster', async (req, res) => {
         if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
         const [players] = await db.execute('SELECT p.riot_id, p.email FROM Team_Rosters tr JOIN Players p ON tr.player_id = p.player_id WHERE tr.team_id = ?', [teamId]);
         
-        // Calculate team match history and stats
+        // FIX: Corrected column name alias (team_b_name) so match history properly flows to frontend UI
         const [matches] = await db.execute(`
-            SELECT m.*, tA.name as team_a_name, tB.name as tourn_b_name 
+            SELECT m.*, tA.name as team_a_name, tB.name as team_b_name 
             FROM Matches m 
             LEFT JOIN Teams tA ON m.team_a_id = tA.team_id 
             LEFT JOIN Teams tB ON m.team_b_id = tB.team_id 
@@ -449,6 +472,9 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// ==========================================
+// VERCEL ANGULAR FRONTEND SERVING (With Anti-Cache Control)
+// ==========================================
 const possibleFrontendPaths = [
     path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser'),
     path.join(__dirname, 'dist/esports-frontend/browser'),

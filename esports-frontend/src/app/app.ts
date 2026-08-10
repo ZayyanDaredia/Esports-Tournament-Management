@@ -205,6 +205,10 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
+  get openTournaments() {
+    return this.tournaments.filter(t => t.status === 'REGISTRATION_OPEN');
+  }
+
   get filteredTournaments() {
     return this.tournaments.filter(t => {
       const matchesSearch = t.name.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -284,14 +288,14 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
-  getMatchStatus(match: any): { label: string, color: string } {
+  getMatchStatus(match: any): { label: string, color: string, bg: string } {
     if (match.winner_id) {
-      return { label: 'COMPLETED', color: '#10b981' };
+      return { label: 'COMPLETED', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
     }
     if (match.team_a_id && match.team_b_id) {
-      return { label: 'LIVE', color: '#f59e0b' };
+      return { label: 'LIVE', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' };
     }
-    return { label: 'UPCOMING', color: '#64748b' };
+    return { label: 'UPCOMING', color: '#64748b', bg: 'rgba(100, 116, 139, 0.1)' };
   }
 
   processRoundsData() {
