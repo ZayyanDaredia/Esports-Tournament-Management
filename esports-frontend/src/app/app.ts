@@ -277,16 +277,6 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
-  // Deprecated usage fallback if old template code remains
-  createTournament(name: string, game: string) {
-    if (!name || !name.trim()) return;
-    this.http.post('/api/tournaments', { name, game_title: game }, this.getAuthHeaders()).subscribe({
-      next: () => { this.fetchTournaments(); },
-      error: (err) => alert(err.error.error || 'Failed')
-    });
-  }
-
-  // New validation method for Admin Box
   submitAdminTournament() {
     this.adminTourneySubmitAttempt = true;
 
@@ -461,4 +451,13 @@ export class App implements OnInit, OnDestroy {
   closeTeamModal() {
     this.selectedTeamRoster = null;
   }
+
+  // ==========================================
+  // TRACK-BY FUNCTIONS (PREVENTS UI FLICKER/CLOSING)
+  // ==========================================
+  trackByTourney(index: number, item: any) { return item.tournament_id; }
+  trackByTeam(index: number, item: any) { return item.team_id; }
+  trackByRound(index: number, item: any) { return item.roundNumber; }
+  trackByMatch(index: number, item: any) { return item.match_id; }
+  trackByIndex(index: number, item: any) { return index; }
 }
