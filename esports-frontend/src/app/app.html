@@ -258,8 +258,10 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
           <div *ngFor="let t of filteredTournaments" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
             
-            <!-- Card Header (Clickable Box) -->
-            <div (click)="toggleTournament(t)" style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-left: 4px solid #38bdf8; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: transform 0.2s, background 0.2s; min-height: 120px;">
+            <!-- Card Header (Clickable Box - DYNAMIC BORDER COLOR) -->
+            <div (click)="toggleTournament(t)" 
+                 [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b'))"
+                 style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: transform 0.2s, background 0.2s; min-height: 120px;">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                   <span [style.color]="t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b')" [style.background]="t.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : (t.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)')" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
@@ -320,8 +322,7 @@
                   </div>
                   <div *ngFor="let match of round.matches" style="background: #1c2333; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); position: relative; border: 1px solid rgba(255,255,255,0.02);">
                     <div style="font-size: 11px; color: #64748b; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 600; letter-spacing: 0.5px;">
-                      <span>MATCH #{{ match.match_id }}</span>
-                      <span *ngIf="match.winner_id" style="color: #00d28a;">COMPLETED</span>
+                      <span>MATCH #{{ match.match_id }}</span><span *ngIf="match.winner_id" style="color: #00d28a;">COMPLETED</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                       <span [style.color]="match.winner_id === match.team_a_id ? '#fff' : (match.team_a_name ? '#94a3b8' : '#475569')" style="font-size: 14px; font-weight: 600;">
@@ -343,25 +344,16 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Registered Teams -->
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
                 <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
-                    <div>
-                      <strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong>
-                      <span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span>
-                    </div>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                      <a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster</a>
-                      <button (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button>
-                    </div>
+                    <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
+                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster</a></div>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
