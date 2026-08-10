@@ -195,6 +195,16 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  // Toggles the tournament hub panel open/closed
+  toggleTournament(tourney: any) {
+    if (this.activeTournament && this.activeTournament.tournament_id === tourney.tournament_id) {
+      this.activeTournament = null;
+      this.isManualBracketMode = false;
+    } else {
+      this.selectTournament(tourney);
+    }
+  }
+
   selectTournament(tourney: any) {
     this.activeTournament = tourney;
     this.filteredTeams = this.teams.filter(t => t.tournament_id === tourney.tournament_id);
@@ -266,6 +276,10 @@ export class App implements OnInit, OnDestroy {
   }
 
   createTournament(name: string, game: string) {
+    if (!name || !name.trim()) {
+      alert("Tournament Name is required");
+      return;
+    }
     this.http.post('/api/tournaments', { name, game_title: game }, this.getAuthHeaders()).subscribe({
       next: () => { this.fetchTournaments(); },
       error: (err) => alert(err.error.error || 'Failed')
