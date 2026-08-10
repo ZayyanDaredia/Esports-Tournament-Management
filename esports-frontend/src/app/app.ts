@@ -38,6 +38,13 @@ export class App implements OnInit, OnDestroy {
   selectedStatus: string = 'ALL';
   tournamentView: 'all' | 'my' = 'all';
 
+  // Loading and Toast states
+  isLoadingTournaments: boolean = false;
+  isLoadingMatches: boolean = false;
+  toastMessage: string | null = null;
+  toastType: 'success' | 'error' | null = null;
+  private toastTimer: any = null;
+
   regTourneyId: string = '';
   regTeamName: string = '';
   regCap: string = '';
@@ -97,6 +104,18 @@ export class App implements OnInit, OnDestroy {
     if (this.pollSub) this.pollSub.unsubscribe();
   }
 
+  showToast(message: string, type: 'success' | 'error') {
+    this.toastMessage = message;
+    this.toastType = type;
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      this.toastMessage = null;
+      this.toastType = null;
+      this.cdr.detectChanges();
+    }, 3500);
+    this.cdr.detectChanges();
+  }
+
   getAuthHeaders() {
     const token = localStorage.getItem('authToken');
     return { headers: new HttpHeaders({ 'Authorization': `Bearer ${token}` }) };
@@ -114,16 +133,21 @@ export class App implements OnInit, OnDestroy {
         localStorage.setItem('userId', res.userId.toString());
         this.fetchTeams();
         this.fetchTournaments();
+        this.showToast('Successfully logged in!', 'success');
         this.cdr.detectChanges();
       },
-      error: (err) => alert(err.error.error || 'Invalid credentials')
+      error: (err) => this.showToast(err.error.error || 'Invalid credentials', 'error')
     });
   }
 
   signup(user: string, pass: string) {
     this.http.post('/api/signup', { username: user, password: pass }).subscribe({
-      next: () => { this.authMode = 'login'; this.cdr.detectChanges(); },
-      error: (err) => alert(err.error.error || 'Signup failed')
+      next: () => { 
+        this.authMode = 'login'; 
+        this.showToast('Account created successfully! Please log in.', 'success');
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => this.showToast(err.error.error || 'Signup failed', 'error')
     });
   }
 
@@ -140,6 +164,7 @@ export class App implements OnInit, OnDestroy {
     localStorage.removeItem('username');
     localStorage.removeItem('userId');
     this.fetchTournaments();
+    this.showToast('Logged out successfully', 'success');
   }
 
   fetchTeams() {
@@ -156,11 +181,17 @@ export class App implements OnInit, OnDestroy {
   }
 
   fetchTournaments() {
+    this.isLoadingTournaments = true;
     this.http.get<any[]>('/api/tournaments').subscribe({
       next: (data) => { 
         this.tournaments = data as any[]; 
         this.updateVisibleTournaments();
+        this.isLoadingTournaments = false;
         this.cdr.detectChanges(); 
+      },
+      error: () => {
+        this.isLoadingTournaments = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -190,6 +221,14 @@ export class App implements OnInit, OnDestroy {
     });
   }
 
+  get activeFilteredTournaments() {
+    return this.filteredTournaments.filter(t => t.status !== 'COMPLETED');
+  }
+
+  get completedFilteredTournaments() {
+    return this.filteredTournaments.filter(t => t.status === 'COMPLETED');
+  }
+
   toggleTournament(tourney: any) {
     if (this.activeTournament && this.activeTournament.tournament_id === tourney.tournament_id) {
       this.activeTournament = null;
@@ -203,6 +242,7 @@ export class App implements OnInit, OnDestroy {
     this.activeTournament = tourney;
     this.filteredTeams = this.teams.filter(t => t.tournament_id === tourney.tournament_id);
     this.isManualBracketMode = false;
+    this.isLoadingMatches = true;
     
     this.http.get<any[]>(`/api/tournaments/${tourney.tournament_id}/matches`).subscribe({
       next: (data) => { 
@@ -214,7 +254,12 @@ export class App implements OnInit, OnDestroy {
         }));
 
         this.processRoundsData();
+        this.isLoadingMatches = false;
         this.cdr.detectChanges(); 
+      },
+      error: () => {
+        this.isLoadingMatches = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -237,6 +282,16 @@ export class App implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  getMatchStatus(match: any): { label: string, color: string } {
+    if (match.winner_id) {
+      return { label: 'COMPLETED', color: '#10b981' };
+    }
+    if (match.team_a_id && match.team_b_id) {
+      return { label: 'LIVE', color: '#f59e0b' };
+    }
+    return { label: 'UPCOMING', color: '#64748b' };
   }
 
   processRoundsData() {
@@ -284,8 +339,9 @@ export class App implements OnInit, OnDestroy {
         this.adminTourneyName = '';
         this.adminTourneyGame = '';
         this.fetchTournaments(); 
+        this.showToast('Tournament created successfully!', 'success');
       },
-      error: (err) => alert(err.error.error || 'Failed to create tournament')
+      error: (err) => this.showToast(err.error.error || 'Failed to create tournament', 'error')
     });
   }
 
@@ -295,14 +351,15 @@ export class App implements OnInit, OnDestroy {
       next: () => { 
         this.selectTournament(this.activeTournament); 
         this.fetchTournaments();
+        this.showToast('Tournament bracket generated!', 'success');
       },
-      error: (err) => alert(err.error.error || 'Error generating bracket.')
+      error: (err) => this.showToast(err.error.error || 'Error generating bracket.', 'error')
     });
   }
 
   openManualBracketBuilder() {
     if (!this.filteredTeams || this.filteredTeams.length < 2) {
-      alert('At least 2 registered teams are required to build a bracket.');
+      this.showToast('At least 2 registered teams are required to build a bracket.', 'error');
       return;
     }
     this.isManualBracketMode = true;
@@ -326,7 +383,7 @@ export class App implements OnInit, OnDestroy {
     if (!this.activeTournament) return;
     for (let m of this.manualMatchups) {
       if (!m.team_a_id) {
-        alert('Every match must have at least a Team A assigned.');
+        this.showToast('Every match must have at least a Team A assigned.', 'error');
         return;
       }
     }
@@ -338,8 +395,9 @@ export class App implements OnInit, OnDestroy {
         this.isManualBracketMode = false;
         this.selectTournament(this.activeTournament);
         this.fetchTournaments();
+        this.showToast('Manual bracket generated successfully!', 'success');
       },
-      error: (err) => alert(err.error.error || 'Failed to generate manual bracket')
+      error: (err) => this.showToast(err.error.error || 'Failed to generate manual bracket', 'error')
     });
   }
 
@@ -350,8 +408,9 @@ export class App implements OnInit, OnDestroy {
         next: () => {
           this.selectTournament(this.activeTournament);
           this.fetchTournaments();
+          this.showToast('Bracket reset successfully', 'success');
         },
-        error: (err) => alert(err.error.error || 'Failed to reset bracket')
+        error: (err) => this.showToast(err.error.error || 'Failed to reset bracket', 'error')
       });
     }
   }
@@ -362,7 +421,7 @@ export class App implements OnInit, OnDestroy {
     
     let winnerId = null;
     if (!match.team_b_id) {
-      winnerId = match.team_a_id; // Bye matches automatically advance Team A
+      winnerId = match.team_a_id;
     } else {
       if (a > b) winnerId = match.team_a_id;
       else if (b > a) winnerId = match.team_b_id;
@@ -374,8 +433,9 @@ export class App implements OnInit, OnDestroy {
         match.isEditing = false;
         this.selectTournament(this.activeTournament);
         this.fetchTournaments();
+        this.showToast('Match score updated successfully!', 'success');
       },
-      error: (err) => alert(err.error.error || 'Failed to update score')
+      error: (err) => this.showToast(err.error.error || 'Failed to update score', 'error')
     });
   }
 
@@ -386,8 +446,11 @@ export class App implements OnInit, OnDestroy {
   deleteTeam(id: number) {
     if (confirm('Delete this team?')) {
       this.http.delete(`/api/teams/${id}`, this.getAuthHeaders()).subscribe({
-        next: () => this.fetchTeams(),
-        error: (err) => alert(err.error.error || 'Failed')
+        next: () => {
+          this.fetchTeams();
+          this.showToast('Team removed successfully', 'success');
+        },
+        error: (err) => this.showToast(err.error.error || 'Failed', 'error')
       });
     }
   }
@@ -402,8 +465,9 @@ export class App implements OnInit, OnDestroy {
           this.filteredTeams = [];
           this.fetchTournaments();
           this.fetchTeams();
+          this.showToast('Tournament deleted successfully', 'success');
         },
-        error: (err) => alert(err.error.error || 'Failed')
+        error: (err) => this.showToast(err.error.error || 'Failed', 'error')
       });
     }
   }
@@ -434,8 +498,9 @@ export class App implements OnInit, OnDestroy {
         this.regSub2 = '';
         this.fetchTeams(); 
         this.fetchTournaments();
+        this.showToast('Team roster registered successfully!', 'success');
       },
-      error: (err) => alert(err.error.error || 'Failed to register')
+      error: (err) => this.showToast(err.error.error || 'Failed to register', 'error')
     });
   }
 

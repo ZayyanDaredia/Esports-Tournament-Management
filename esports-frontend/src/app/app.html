@@ -1,4 +1,11 @@
-<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; background: #0b0f19; min-height: 100vh;">
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; background: #0b0f19; min-height: 100vh; position: relative;">
+
+  <!-- ========================================== -->
+  <!-- FLOATING TOAST NOTIFICATION -->
+  <!-- ========================================== -->
+  <div *ngIf="toastMessage" [style.background]="toastType === 'success' ? '#10b981' : '#ef4444'" style="position: fixed; top: 25px; right: 25px; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 2000; animation: fadeIn 0.3s ease;">
+    {{ toastMessage }}
+  </div>
 
   <!-- ========================================== -->
   <!-- 1. ESPORTS HUB HEADER (SHARED) -->
@@ -107,7 +114,7 @@
       </div>
 
       <!-- 3A. USER: TOURNAMENTS & ACCORDION HUB -->
-      <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
+      <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02); margin-bottom: 40px;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
           <h2 style="margin: 0; font-size: 20px; color: #fff; font-weight: 700;">Tournaments</h2>
@@ -140,16 +147,21 @@
           </select>
         </div>
 
-        <!-- Tournaments Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
-          <div *ngFor="let t of filteredTournaments; trackBy: trackByTourney" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
+        <!-- Loading State Indicator -->
+        <div *ngIf="isLoadingTournaments" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;">
+          Loading tournaments...
+        </div>
+
+        <!-- Active Tournaments Grid -->
+        <div *ngIf="!isLoadingTournaments" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
+          <div *ngFor="let t of activeFilteredTournaments; trackBy: trackByTourney" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
             
             <div (click)="toggleTournament(t)" 
-                 [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b'))"
+                 [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : '#10b981')"
                  style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: transform 0.2s, background 0.2s; min-height: 120px;">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <span [style.color]="t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b')" [style.background]="t.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : (t.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)')" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
+                  <span [style.color]="t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : '#10b981'" [style.background]="t.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : 'rgba(16, 185, 129, 0.1)'" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
                   <span style="font-size: 12px; color: #64748b; font-weight: 500;">ID #{{ t.tournament_id }}</span>
                 </div>
                 <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
@@ -161,11 +173,12 @@
               </div>
             </div>
 
-            <!-- User Expanded Hub Content -->
+            <!-- Expanded Hub & Bracket Tree -->
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
-              <div *ngIf="rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
+              <div *ngIf="isLoadingMatches" style="color: #64748b; padding: 40px 0; text-align: center;">Loading bracket matches...</div>
+              <div *ngIf="!isLoadingMatches && rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
               
-              <div style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+              <div *ngIf="!isLoadingMatches && rounds.length > 0" style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
                 <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
                   
                   <div style="text-align: center; margin-top: 10px; margin-bottom: 25px;">
@@ -183,7 +196,7 @@
                       
                       <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
                         <span>MATCH #{{ match.display_id }}</span>
-                        <span *ngIf="match.winner_id" style="color: #10b981;">COMPLETED</span>
+                        <span [style.color]="getMatchStatus(match).color" style="font-weight: 700;">{{ getMatchStatus(match).label }}</span>
                       </div>
 
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -218,7 +231,7 @@
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
                     <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
-                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster</a></div>
+                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster & Stats</a></div>
                   </div>
                 </div>
               </div>
@@ -227,6 +240,26 @@
           </div>
         </div>
       </div>
+
+      <!-- COMPLETED TOURNAMENTS SECTION (USER) -->
+      <div *ngIf="completedFilteredTournaments.length > 0" style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
+        <h2 style="margin: 0 0 30px 0; font-size: 20px; color: #fff; font-weight: 700;">Completed Tournaments</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
+          <div *ngFor="let t of completedFilteredTournaments; trackBy: trackByTourney">
+            <div (click)="toggleTournament(t)" style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-left: 4px solid #64748b; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; min-height: 120px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-size: 10px; background: rgba(100, 116, 139, 0.1); color: #64748b; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">COMPLETED</span>
+                  <span style="font-size: 12px; color: #64748b; font-weight: 500;">ID #{{ t.tournament_id }}</span>
+                </div>
+                <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
+                <p style="margin: 0; font-size: 13px; font-weight: 600;" [style.color]="t.game_title === 'Valorant' ? '#ff4655' : '#eab308'">🎮 {{ t.game_title }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
 
@@ -268,7 +301,7 @@
       </div>
 
       <!-- 3B. ADMIN: TOURNAMENTS SECTION -->
-      <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
+      <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02); margin-bottom: 40px;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
           <h2 style="margin: 0; font-size: 20px; color: #fff; font-weight: 700;">Tournaments</h2>
@@ -295,16 +328,21 @@
           </select>
         </div>
 
+        <!-- Loading State Indicator -->
+        <div *ngIf="isLoadingTournaments" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;">
+          Loading tournaments...
+        </div>
+
         <!-- Tournaments Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
-          <div *ngFor="let t of filteredTournaments; trackBy: trackByTourney" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
+        <div *ngIf="!isLoadingTournaments" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
+          <div *ngFor="let t of activeFilteredTournaments; trackBy: trackByTourney" [style.grid-column]="activeTournament?.tournament_id === t.tournament_id ? '1 / -1' : 'auto'">
             
             <div (click)="toggleTournament(t)" 
-                 [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b'))"
+                 [style.border-left]="'4px solid ' + (t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : '#10b981')"
                  style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: transform 0.2s, background 0.2s; min-height: 120px;">
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                  <span [style.color]="t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (t.status === 'ONGOING' ? '#10b981' : '#64748b')" [style.background]="t.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : (t.status === 'ONGOING' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(100, 116, 139, 0.1)')" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
+                  <span [style.color]="t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : '#10b981'" [style.background]="t.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : 'rgba(16, 185, 129, 0.1)'" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
                   <span style="font-size: 12px; color: #64748b; font-weight: 500;">ID #{{ t.tournament_id }}</span>
                 </div>
                 <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
@@ -317,7 +355,7 @@
               </div>
             </div>
 
-            <!-- Expanded Hub & Bracket Tree (Admin View with Editable Scores & Toggleable Save/Edit Buttons) -->
+            <!-- Expanded Hub & Bracket Tree -->
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
               
               <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; margin-bottom: 40px;">
@@ -350,10 +388,10 @@
                 </div>
               </div>
 
-              <!-- Bracket UI Tree -->
-              <div *ngIf="rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
+              <div *ngIf="isLoadingMatches" style="color: #64748b; padding: 40px 0; text-align: center;">Loading bracket matches...</div>
+              <div *ngIf="!isLoadingMatches && rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
               
-              <div style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+              <div *ngIf="!isLoadingMatches && rounds.length > 0" style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
                 <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
                   
                   <div style="text-align: center; margin-top: 10px; margin-bottom: 25px;">
@@ -371,7 +409,7 @@
                       
                       <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
                         <span>MATCH #{{ match.display_id }}</span>
-                        <span *ngIf="match.winner_id" style="color: #10b981;">COMPLETED</span>
+                        <span [style.color]="getMatchStatus(match).color" style="font-weight: 700;">{{ getMatchStatus(match).label }}</span>
                       </div>
 
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -415,7 +453,7 @@
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
                     <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
-                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster</a><button (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button></div>
+                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Roster & Stats</a><button (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button></div>
                   </div>
                 </div>
               </div>
@@ -425,21 +463,63 @@
         </div>
       </div>
 
+      <!-- COMPLETED TOURNAMENTS SECTION (ADMIN) -->
+      <div *ngIf="completedFilteredTournaments.length > 0" style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
+        <h2 style="margin: 0 0 30px 0; font-size: 20px; color: #fff; font-weight: 700;">Completed Tournaments</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; align-items: start;">
+          <div *ngFor="let t of completedFilteredTournaments; trackBy: trackByTourney">
+            <div (click)="toggleTournament(t)" style="display: flex; flex-direction: column; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; border-left: 4px solid #64748b; border-top: 1px solid rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; min-height: 120px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <span style="font-size: 10px; background: rgba(100, 116, 139, 0.1); color: #64748b; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">COMPLETED</span>
+                  <span style="font-size: 12px; color: #64748b; font-weight: 500;">ID #{{ t.tournament_id }}</span>
+                </div>
+                <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
+                <p style="margin: 0; font-size: 13px; font-weight: 600;" [style.color]="t.game_title === 'Valorant' ? '#ff4655' : '#eab308'">🎮 {{ t.game_title }}</p>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <button (click)="deleteTournament(t.tournament_id); $event.stopPropagation()" style="background: transparent; border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;">Delete</button>
+                <div [style.transform]="activeTournament?.tournament_id === t.tournament_id ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition: transform 0.3s; color: #64748b; font-size: 16px; pointer-events: none;">▼</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <!-- ========================================== -->
-  <!-- TEAM ROSTER MODAL (SHARED) -->
+  <!-- TEAM ROSTER & STATS MODAL (SHARED) -->
   <!-- ========================================== -->
   <div *ngIf="selectedTeamRoster" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-    <div style="background: #151a27; padding: 40px; border-radius: 24px; width: 400px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);">
-      <h3 style="margin: 0 0 8px 0; color: #fff; font-size: 22px; font-weight: 700;">{{ selectedTeamRoster.team.name }}</h3>
-      <p style="color: #00d28a; margin: 0 0 25px 0; font-size: 13px; font-weight: 600; text-transform: uppercase;">Official Roster</p>
+    <div style="background: #151a27; padding: 40px; border-radius: 24px; width: 450px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); max-height: 85vh; overflow-y: auto;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h3 style="margin: 0; color: #fff; font-size: 22px; font-weight: 700;">{{ selectedTeamRoster.team.name }}</h3>
+        <div style="display: flex; gap: 8px;" *ngIf="selectedTeamRoster.stats">
+          <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">{{ selectedTeamRoster.stats.wins }}W</span>
+          <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">{{ selectedTeamRoster.stats.losses }}L</span>
+        </div>
+      </div>
+      <p style="color: #00d28a; margin: 0 0 25px 0; font-size: 13px; font-weight: 600; text-transform: uppercase;">Official Roster & Profile</p>
 
-      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 35px;">
+      <h4 style="color: #94a3b8; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">Squad Lineup</h4>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
         <div *ngFor="let player of selectedTeamRoster.roster" style="background: rgba(255,255,255,0.03); padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
           <strong style="color: #fff; font-size: 14px;">{{ player.riot_id }}</strong> 
           <span style="color: #64748b; font-size: 12px;">{{ player.email }}</span>
+        </div>
+      </div>
+
+      <h4 *ngIf="selectedTeamRoster.matches && selectedTeamRoster.matches.length > 0" style="color: #94a3b8; font-size: 12px; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">Match History</h4>
+      <div *ngIf="selectedTeamRoster.matches && selectedTeamRoster.matches.length > 0" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px;">
+        <div *ngFor="let m of selectedTeamRoster.matches" style="background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+          <span style="color: #94a3b8;">Round {{ m.round_number }}</span>
+          <span style="color: #fff; font-weight: 600;">{{ m.score_a }} - {{ m.score_b }}</span>
+          <span [style.color]="m.winner_id === selectedTeamRoster.team.team_id ? '#10b981' : '#ef4444'" style="font-weight: 700;">
+            {{ m.winner_id === selectedTeamRoster.team.team_id ? 'WIN' : (m.winner_id ? 'LOSS' : 'PENDING') }}
+          </span>
         </div>
       </div>
 
