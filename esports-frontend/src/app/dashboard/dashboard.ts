@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -15,6 +15,7 @@ export class DashboardComponent implements OnInit {
   http = inject(HttpClient);
   router = inject(Router);
   api = inject(ApiService);
+  cdr = inject(ChangeDetectorRef); // <-- Added the manual UI updater
 
   tournaments: any[] = [];
   teams: any[] = [];
@@ -28,7 +29,6 @@ export class DashboardComponent implements OnInit {
   isLoadingTournaments: boolean = false;
 
   ngOnInit() {
-    // If the user isn't logged in, kick them back to login
     if (!this.api.userRole.value) {
       this.router.navigate(['/login']);
       return;
@@ -45,10 +45,12 @@ export class DashboardComponent implements OnInit {
         this.tournaments = data; 
         this.updateVisibleTournaments();
         this.isLoadingTournaments = false;
+        this.cdr.detectChanges(); // <-- Forces the UI to show the tournaments immediately
       },
       error: () => {
         this.isLoadingTournaments = false;
         this.api.showToast('Failed to load tournaments', 'error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -58,6 +60,7 @@ export class DashboardComponent implements OnInit {
       next: (data) => { 
         this.teams = data; 
         this.updateVisibleTournaments();
+        this.cdr.detectChanges(); // <-- Forces the UI to update
       }
     });
   }
@@ -66,8 +69,6 @@ export class DashboardComponent implements OnInit {
     if (this.api.userRole.value === 'admin') {
       this.visibleTournaments = this.tournaments;
     } else {
-      // For users, show tournaments they are registered in OR are open/ongoing
-      // (You can adjust this logic, but for the dashboard grid, we'll show all available to search)
       this.visibleTournaments = this.tournaments; 
     }
   }
@@ -107,7 +108,7 @@ export class DashboardComponent implements OnInit {
   }
 
   deleteTournament(id: number, event: Event) {
-    event.stopPropagation(); // Prevents the card click from navigating to the tournament page
+    event.stopPropagation(); 
     if (confirm('Delete this tournament completely?')) {
       this.http.delete(`/api/tournaments/${id}`, this.api.getAuthHeaders()).subscribe({
         next: () => {
