@@ -440,7 +440,7 @@ app.delete('/api/teams/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-app.get('/api/tournaments/:id/matches', async (req, res) => {
+app.get('/api/tournaments/:id/bracket', async (req, res) => {
     const tournamentId = req.params.id;
     try {
         const query = `
@@ -455,12 +455,25 @@ app.get('/api/tournaments/:id/matches', async (req, res) => {
             ORDER BY m.round_number ASC, m.match_id ASC
         `;
         const [matches] = await db.execute(query, [tournamentId]);
-        const localizedMatches = matches.map((m, idx) => ({
-            ...m,
-            display_id: idx + 1
-        }));
-        res.status(200).json(localizedMatches);
+        
+        // Group matches by round number to match the frontend expectations
+        const roundsMap = {};
+        matches.forEach(m => {
+            const rNum = m.round_number;
+            if (!roundsMap[rNum]) {
+                roundsMap[rNum] = {
+                    round_number: rNum,
+                    title: rNum === 1 ? 'Quarter-Finals' : (rNum === 2 ? 'Semi-Finals' : 'Finals'),
+                    matches: []
+                };
+            }
+            roundsMap[rNum].matches.push(m);
+        });
+
+        const rounds = Object.values(roundsMap);
+        res.status(200).json({ rounds });
     } catch (error) {
+        console.error('Bracket fetch error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
