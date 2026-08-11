@@ -1,4 +1,4 @@
-<div class="container" style="width: 100%; box-sizing: border-box; padding: 40px 4%; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; background: #0b0f19; min-height: 100vh; position: relative;">
+<div class="container" style="width: 100%; max-width: 1200px; margin: 0 auto; box-sizing: border-box; padding: 40px 4%; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; background: #0b0f19; min-height: 100vh; position: relative;">
 
   <!-- FLOATING TOAST NOTIFICATION -->
   <div *ngIf="toastMessage" [style.background]="toastType === 'success' ? '#10b981' : '#ef4444'" style="position: fixed; top: 25px; right: 25px; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); z-index: 2000; animation: fadeIn 0.3s ease;">
@@ -11,12 +11,12 @@
       <span style="color: #f43f5e;">⚡</span> ESPORTS HUB
     </h1>
     
-    <div *ngIf="userRole" style="display: flex; align-items: center; gap: 20px;">
+    <div *ngIf="api.userRole.value" style="display: flex; align-items: center; gap: 20px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="width: 8px; height: 8px; background: #00d28a; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 210, 138, 0.5);"></span>
-        <span style="font-size: 14px; color: #94a3b8; font-weight: 500;">{{ username }} <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">({{ userRole }})</span></span>
+        <span style="font-size: 14px; color: #94a3b8; font-weight: 500;">{{ api.username.value }} <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">({{ api.userRole.value }})</span></span>
       </div>
-      <button (click)="logout()" style="background: transparent; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; background: rgba(255,255,255,0.03);">Logout</button>
+      <button (click)="api.logout()" style="background: transparent; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; background: rgba(255,255,255,0.03);">Logout</button>
     </div>
   </header>
 
