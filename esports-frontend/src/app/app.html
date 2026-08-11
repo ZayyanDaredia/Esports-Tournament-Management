@@ -1,4 +1,4 @@
-<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; background: #0b0f19; min-height: 100vh; position: relative;">
+<div class="container" style="width: 100%; box-sizing: border-box; padding: 40px 4%; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f8fafc; background: #0b0f19; min-height: 100vh; position: relative;">
 
   <!-- ========================================== -->
   <!-- FLOATING TOAST NOTIFICATION -->
@@ -113,7 +113,7 @@
         <button (click)="registerFullTeam()" style="width: 100%; background: #ef4444; color: #ffffff; border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); transition: 0.2s;">Submit Roster</button>
       </div>
 
-      <!-- 3A. USER: TOURNAMENTS & ACCORDION HUB -->
+      <!-- 3A. USER: ACTIVE TOURNAMENTS & ACCORDION HUB -->
       <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02); margin-bottom: 40px;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
@@ -179,76 +179,79 @@
               <div *ngIf="!isLoadingMatches && rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
               
               <div *ngIf="!isLoadingMatches && rounds.length > 0" style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+                
+                <!-- BRACKET COLUMN LOOP -->
                 <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
                   
-                  <!-- ALIGNED HEADER -->
-                  <div style="text-align: center; margin-top: 10px; margin-bottom: 25px; flex-shrink: 0;">
+                  <!-- ALIGNED ROUND HEADER -->
+                  <div style="text-align: center; margin-bottom: 25px; height: 35px; flex-shrink: 0;">
                     <span style="color: #38bdf8; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2);">
                       {{ round.title }}
                     </span>
                   </div>
 
-                  <!-- DYNAMIC MATCHES COLUMN -->
-                  <div style="display: flex; flex-direction: column; justify-content: space-around; flex-grow: 1; gap: 20px;">
+                  <!-- WRAPPER LAYOUT FOR PERFECT LINES -->
+                  <div style="display: flex; flex-direction: column; width: 100%;">
                     <div *ngFor="let match of round.matches; let i = index; trackBy: trackByMatch" 
-                         [style.margin-top]="round.roundNumber > 1 ? (round.roundNumber === 2 ? '40px' : '90px') : '0px'"
-                         [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
-                         [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
-                         style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative;">
+                         [style.height.px]="getWrapperHeight(round.roundNumber)"
+                         style="display: flex; flex-direction: column; justify-content: center; position: relative;">
                       
                       <!-- Bracket Connector OUT (Right side) -->
-                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
-                      
-                      <!-- Bracket Connector DOWN (From Top match of pair) -->
-                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0 && i + 1 < round.matches.length" 
-                           style="position: absolute; right: -20px; top: 50%; width: 2px; background-color: #334155; z-index: 0;"
-                           [style.height]="'calc(100% + 20px + ' + (round.roundNumber > 1 ? (round.roundNumber === 2 ? 40 : 90) : 0) + 'px)'">
-                      </div>
-
+                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <!-- Bracket Connector DOWN (From Even indices) -->
+                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0" style="position: absolute; right: -20px; top: calc(50% - 1px); width: 2px; background-color: #334155; z-index: 0;" [style.height.px]="getVerticalLineHeight(round.roundNumber)"></div>
                       <!-- Bracket Connector IN (Left side) -->
-                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
 
-                      <!-- Match Number & Badge -->
-                      <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
-                        <span>MATCH #{{ match.display_id }}</span>
-                        <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
+                      <!-- MATCH BOX -->
+                      <div [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
+                           [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
+                           style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative; z-index: 10;">
+                        
+                        <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
+                          <span>MATCH #{{ match.display_id }}</span>
+                          <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
+                        </div>
+
+                        <!-- Team A Input Row -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_a_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="true" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
+
+                        <!-- Team B Input Row -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_b_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="true" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
+
                       </div>
-
-                      <!-- Team A -->
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_a_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id === match.team_a_id">👑</span>
-                        </span>
-                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_a }}</span>
-                      </div>
-
-                      <!-- Team B -->
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_b_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id === match.team_b_id">👑</span>
-                        </span>
-                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_b }}</span>
-                      </div>
-
                     </div>
                   </div>
 
                 </div>
               </div>
 
+              <!-- Participating Teams Footer -->
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
                 <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
                     <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
-                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Profile</a></div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                      <a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Profile</a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -281,54 +284,55 @@
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
               <div *ngIf="isLoadingMatches" style="color: #64748b; padding: 40px 0; text-align: center;">Loading bracket matches...</div>
               <div *ngIf="!isLoadingMatches && rounds.length > 0" style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+                
                 <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
                   
-                  <div style="text-align: center; margin-top: 10px; margin-bottom: 25px; flex-shrink: 0;">
+                  <div style="text-align: center; margin-bottom: 25px; height: 35px; flex-shrink: 0;">
                     <span style="color: #38bdf8; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2);">
                       {{ round.title }}
                     </span>
                   </div>
 
-                  <div style="display: flex; flex-direction: column; justify-content: space-around; flex-grow: 1; gap: 20px;">
+                  <div style="display: flex; flex-direction: column; width: 100%;">
                     <div *ngFor="let match of round.matches; let i = index; trackBy: trackByMatch" 
-                         [style.margin-top]="round.roundNumber > 1 ? (round.roundNumber === 2 ? '40px' : '90px') : '0px'"
-                         [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
-                         [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
-                         style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative;">
+                         [style.height.px]="getWrapperHeight(round.roundNumber)"
+                         style="display: flex; flex-direction: column; justify-content: center; position: relative;">
                       
                       <!-- Bracket Connectors -->
-                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
-                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0 && i + 1 < round.matches.length" 
-                           style="position: absolute; right: -20px; top: 50%; width: 2px; background-color: #334155; z-index: 0;"
-                           [style.height]="'calc(100% + 20px + ' + (round.roundNumber > 1 ? (round.roundNumber === 2 ? 40 : 90) : 0) + 'px)'">
-                      </div>
-                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0" style="position: absolute; right: -20px; top: calc(50% - 1px); width: 2px; background-color: #334155; z-index: 0;" [style.height.px]="getVerticalLineHeight(round.roundNumber)"></div>
+                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
 
-                      <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
-                        <span>MATCH #{{ match.display_id }}</span>
-                        <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
-                      </div>
+                      <div [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
+                           [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
+                           style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative; z-index: 10;">
+                        
+                        <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
+                          <span>MATCH #{{ match.display_id }}</span>
+                          <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
+                        </div>
 
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_a_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id === match.team_a_id">👑</span>
-                        </span>
-                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_a }}</span>
-                      </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_a_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="true" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
 
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_b_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id === match.team_b_id">👑</span>
-                        </span>
-                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_b }}</span>
-                      </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_b_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="true" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
 
+                      </div>
                     </div>
                   </div>
 
@@ -337,7 +341,6 @@
               
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
-                <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
                     <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
@@ -391,7 +394,7 @@
         <button (click)="submitAdminTournament()" style="width: 100%; background: #00d28a; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(0, 210, 138, 0.25);">Create Tournament</button>
       </div>
 
-      <!-- 3B. ADMIN: TOURNAMENTS SECTION -->
+      <!-- 3B. ADMIN: ACTIVE TOURNAMENTS SECTION -->
       <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02); margin-bottom: 40px;">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
@@ -419,7 +422,6 @@
           </select>
         </div>
 
-        <!-- Loading State Indicator -->
         <div *ngIf="isLoadingTournaments" style="text-align: center; padding: 40px; color: #64748b; font-weight: 600;">
           Loading tournaments...
         </div>
@@ -449,6 +451,7 @@
             <!-- Expanded Hub & Bracket Tree (Admin View with Editable Scores & Toggleable Save/Edit Buttons) -->
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
               
+              <!-- ADMIN CONTROLS -->
               <div style="background: rgba(255,255,255,0.02); padding: 25px; border-radius: 16px; margin-bottom: 40px;">
                 <div *ngIf="activeTournament.status === 'REGISTRATION_OPEN'" style="display: flex; gap: 15px; flex-wrap: wrap;">
                   <button (click)="generateBracket()" style="background: #fff; color: #0b0f19; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 14px;">Auto-Generate Bracket</button>
@@ -482,77 +485,85 @@
               <div *ngIf="isLoadingMatches" style="color: #64748b; padding: 40px 0; text-align: center;">Loading bracket matches...</div>
               <div *ngIf="!isLoadingMatches && rounds.length === 0" style="color: #64748b; padding: 40px 0; text-align: center; font-size: 15px;">The bracket will appear here once generated.</div>
               
+              <!-- BRACKET TREE -->
               <div *ngIf="!isLoadingMatches && rounds.length > 0" style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
                 <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
                   
-                  <div style="text-align: center; margin-top: 10px; margin-bottom: 25px; flex-shrink: 0;">
+                  <div style="text-align: center; margin-bottom: 25px; height: 35px; flex-shrink: 0;">
                     <span style="color: #38bdf8; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2);">
                       {{ round.title }}
                     </span>
                   </div>
 
-                  <div style="display: flex; flex-direction: column; justify-content: space-around; flex-grow: 1; gap: 20px;">
+                  <div style="display: flex; flex-direction: column; width: 100%;">
                     <div *ngFor="let match of round.matches; let i = index; trackBy: trackByMatch" 
-                         [style.margin-top]="round.roundNumber > 1 ? (round.roundNumber === 2 ? '40px' : '90px') : '0px'"
-                         [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
-                         [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
-                         style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative;">
+                         [style.height.px]="getWrapperHeight(round.roundNumber)"
+                         style="display: flex; flex-direction: column; justify-content: center; position: relative;">
                       
                       <!-- Bracket Connectors -->
-                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
-                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0 && i + 1 < round.matches.length" 
-                           style="position: absolute; right: -20px; top: 50%; width: 2px; background-color: #334155; z-index: 0;"
-                           [style.height]="'calc(100% + 20px + ' + (round.roundNumber > 1 ? (round.roundNumber === 2 ? 40 : 90) : 0) + 'px)'">
-                      </div>
-                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0" style="position: absolute; right: -20px; top: calc(50% - 1px); width: 2px; background-color: #334155; z-index: 0;" [style.height.px]="getVerticalLineHeight(round.roundNumber)"></div>
+                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
 
-                      <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
-                        <span>MATCH #{{ match.display_id }}</span>
-                        <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
-                      </div>
+                      <!-- Match Box -->
+                      <div [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
+                           [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
+                           style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative; z-index: 10;">
+                        
+                        <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
+                          <span>MATCH #{{ match.display_id }}</span>
+                          <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
+                        </div>
 
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_a_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id">👑</span>
-                        </span>
-                        <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="!match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
-                      </div>
+                        <!-- Team A Input Row -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_a_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="userRole !== 'admin' || !match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
 
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_b_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id">👑</span>
-                        </span>
-                        <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="!match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
-                      </div>
+                        <!-- Team B Input Row -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_b_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="userRole !== 'admin' || !match.isEditing" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
 
-                      <div *ngIf="match.team_a_id">
-                        <button *ngIf="match.isEditing" (click)="updateScore(match)" style="width: 100%; background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
-                          Update Score
-                        </button>
-                        <button *ngIf="!match.isEditing" (click)="enableEditScore(match)" style="width: 100%; background: #334155; color: #cbd5e1; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
-                          Edit Score
-                        </button>
+                        <!-- Admin Buttons (Hidden for Users) -->
+                        <div *ngIf="userRole === 'admin' && match.team_a_id">
+                          <button *ngIf="match.isEditing" (click)="updateScore(match)" style="width: 100%; background: #10b981; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                            Update Score
+                          </button>
+                          <button *ngIf="!match.isEditing" (click)="enableEditScore(match)" style="width: 100%; background: #334155; color: #cbd5e1; border: none; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                            Edit Score
+                          </button>
+                        </div>
                       </div>
-
                     </div>
                   </div>
 
                 </div>
               </div>
 
+              <!-- Participating Teams Footer -->
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
                 <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
                     <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
-                    <div style="display: flex; gap: 15px; align-items: center;"><a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Profile</a><button (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button></div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                      <a (click)="openTeamModal(team.team_id)" style="color: #00d28a; font-size: 13px; font-weight: 600; cursor: pointer;">View Profile</a>
+                      <button (click)="deleteTeam(team.team_id)" style="background: transparent; color: #f43f5e; border: none; cursor: pointer; font-size: 13px; font-weight: 500;">Remove</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -582,67 +593,67 @@
               </div>
             </div>
 
-            <!-- Completed Bracket Expanded View (Admin Read Only) -->
+            <!-- Completed Bracket Expanded View (Read Only) -->
             <div *ngIf="activeTournament?.tournament_id === t.tournament_id" style="margin-top: 20px; background: #0b0f19; padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.03); animation: fadeIn 0.3s ease;">
               <div *ngIf="isLoadingMatches" style="color: #64748b; padding: 40px 0; text-align: center;">Loading bracket matches...</div>
               <div *ngIf="!isLoadingMatches && rounds.length > 0" style="display: flex; gap: 40px; overflow-x: auto; padding-top: 20px; padding-bottom: 20px; justify-content: flex-start; align-items: stretch;">
+                
                 <div *ngFor="let round of rounds; trackBy: trackByRound" style="min-width: 300px; flex: 1; display: flex; flex-direction: column;">
                   
-                  <div style="text-align: center; margin-top: 10px; margin-bottom: 25px; flex-shrink: 0;">
+                  <div style="text-align: center; margin-bottom: 25px; height: 35px; flex-shrink: 0;">
                     <span style="color: #38bdf8; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.1); padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.2);">
                       {{ round.title }}
                     </span>
                   </div>
 
-                  <div style="display: flex; flex-direction: column; justify-content: space-around; flex-grow: 1; gap: 20px;">
+                  <div style="display: flex; flex-direction: column; width: 100%;">
                     <div *ngFor="let match of round.matches; let i = index; trackBy: trackByMatch" 
-                         [style.margin-top]="round.roundNumber > 1 ? (round.roundNumber === 2 ? '40px' : '90px') : '0px'"
-                         [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
-                         [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
-                         style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative;">
+                         [style.height.px]="getWrapperHeight(round.roundNumber)"
+                         style="display: flex; flex-direction: column; justify-content: center; position: relative;">
                       
                       <!-- Bracket Connectors -->
-                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
-                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0 && i + 1 < round.matches.length" 
-                           style="position: absolute; right: -20px; top: 50%; width: 2px; background-color: #334155; z-index: 0;"
-                           [style.height]="'calc(100% + 20px + ' + (round.roundNumber > 1 ? (round.roundNumber === 2 ? 40 : 90) : 0) + 'px)'">
-                      </div>
-                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: 50%; height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber < rounds.length" style="position: absolute; right: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
+                      <div *ngIf="round.roundNumber < rounds.length && i % 2 === 0" style="position: absolute; right: -20px; top: calc(50% - 1px); width: 2px; background-color: #334155; z-index: 0;" [style.height.px]="getVerticalLineHeight(round.roundNumber)"></div>
+                      <div *ngIf="round.roundNumber > 1" style="position: absolute; left: -20px; top: calc(50% - 1px); height: 2px; width: 20px; background-color: #334155; z-index: 0;"></div>
 
-                      <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
-                        <span>MATCH #{{ match.display_id }}</span>
-                        <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
-                      </div>
+                      <div [style.border]="(round.roundNumber === rounds.length && match.winner_id) ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.02)'"
+                           [style.box-shadow]="(round.roundNumber === rounds.length && match.winner_id) ? '0 0 25px rgba(251, 191, 36, 0.25)' : '0 10px 20px rgba(0,0,0,0.15)'"
+                           style="background: #1c2333; border-radius: 16px; padding: 20px; position: relative; z-index: 10;">
+                        
+                        <div style="font-size: 12px; color: #38bdf8; margin-bottom: 15px; display: flex; justify-content: space-between; font-weight: 800; letter-spacing: 1px;">
+                          <span>MATCH #{{ match.display_id }}</span>
+                          <span [style.background]="getMatchStatus(match).bg" [style.color]="getMatchStatus(match).color" style="font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
+                        </div>
 
-                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_a_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id">👑</span>
-                        </span>
-                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_a }}</span>
-                      </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id ? '#fbbf24' : (match.winner_id === match.team_a_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_a_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_a_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_a_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_a_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreA" [disabled]="true" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
 
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
-                              [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
-                              style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-                          {{ match.team_b_name || 'TBD' }}
-                          <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id">👑</span>
-                        </span>
-                        <span style="font-size: 14px; font-weight: 700; color: #fff; background: #0b0f19; padding: 4px 10px; border-radius: 8px;">{{ match.score_b }}</span>
-                      </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <span [style.color]="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id ? '#fbbf24' : (match.winner_id === match.team_b_id ? '#10b981' : (match.winner_id && match.winner_id !== match.team_b_id ? '#64748b' : '#fff'))"
+                                [style.text-decoration]="match.winner_id && match.winner_id !== match.team_b_id ? 'line-through' : 'none'"
+                                style="font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                            {{ match.team_b_name || 'TBD' }}
+                            <span *ngIf="round.roundNumber === rounds.length && match.winner_id && match.winner_id === match.team_b_id">👑</span>
+                          </span>
+                          <input type="number" [(ngModel)]="match.tempScoreB" [disabled]="true" style="width: 45px; background: #0b0f19; color: #fff; border: 1px solid rgba(255,255,255,0.1); text-align: center; border-radius: 8px; padding: 6px; font-size: 14px; font-weight: 700; outline: none;">
+                        </div>
 
+                      </div>
                     </div>
                   </div>
 
                 </div>
               </div>
-
+              
               <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
                 <h3 style="margin-bottom: 20px; font-size: 18px; color: #fff; font-weight: 700;">Participating Teams</h3>
-                <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px;">No teams are currently enrolled.</div>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                   <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 18px 24px; border-radius: 16px;">
                     <div><strong style="font-size: 16px; color: #fff; font-weight: 600;">{{ team.team_name }}</strong><span style="font-size: 13px; color: #64748b; margin-left: 15px;">Capt: <span style="color: #94a3b8;">{{ team.captain_riot_id }}</span></span></div>
