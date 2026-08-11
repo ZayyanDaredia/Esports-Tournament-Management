@@ -110,21 +110,21 @@
             </div>
 
             <!-- TEAM A -->
-              <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.03);" [style.background]="match.winner_id === match.team_a_id ? 'rgba(16, 185, 129, 0.05)' : 'transparent'">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <span *ngIf="match.winner_id === match.team_a_id" style="color: #10b981; font-size: 12px;">🏆</span>
-                  <span [style.color]="match.team_a_id ? '#e2e8f0' : '#64748b'" [style.font-style]="match.team_a_id ? 'normal' : 'italic'" style="font-weight: 600; font-size: 14px;">{{ match.team_a_name || (match.round_number === 1 && match.team_b_id ? 'BYE' : 'TBD') }}</span>
-                </div>
-                <div *ngIf="!match.isEditing && match.score_a !== null" style="font-weight: 700; font-size: 15px; color: #fff;">{{ match.score_a }}</div>
-                
-                <!-- Fixed: Only check !match.team_a_id so BYE matches can be edited -->
-                <input *ngIf="match.isEditing" type="number" [(ngModel)]="match.tempScoreA" [disabled]="!match.team_a_id" [style.opacity]="!match.team_a_id ? '0.4' : '1'" style="width: 40px; background: rgba(0,0,0,0.3); border: 1px solid #38bdf8; color: #fff; border-radius: 6px; padding: 4px; text-align: center; font-weight: 700; outline: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.03);" [style.background]="match.winner_id === match.team_a_id ? 'rgba(16, 185, 129, 0.05)' : 'transparent'">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span *ngIf="match.winner_id === match.team_a_id" style="color: #10b981; font-size: 12px;">🏆</span>
+                <!-- Clean TBD / BYE text without any trophy icon -->
+                <span [style.color]="match.team_a_id ? '#e2e8f0' : '#64748b'" [style.font-style]="match.team_a_id ? 'normal' : 'italic'" style="font-weight: 600; font-size: 14px;">{{ match.team_a_name || (match.round_number === 1 && match.team_b_id ? 'BYE' : 'TBD') }}</span>
               </div>
+              <div *ngIf="!match.isEditing && match.score_a !== null" style="font-weight: 700; font-size: 15px; color: #fff;">{{ match.score_a }}</div>
+              <input *ngIf="match.isEditing" type="number" [(ngModel)]="match.tempScoreA" [disabled]="!match.team_a_id" [style.opacity]="!match.team_a_id ? '0.4' : '1'" style="width: 40px; background: rgba(0,0,0,0.3); border: 1px solid #38bdf8; color: #fff; border-radius: 6px; padding: 4px; text-align: center; font-weight: 700; outline: none;">
+            </div>
 
             <!-- TEAM B -->
             <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px;" [style.background]="match.winner_id === match.team_b_id ? 'rgba(16, 185, 129, 0.05)' : 'transparent'">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span *ngIf="match.winner_id === match.team_b_id" style="color: #10b981; font-size: 12px;">🏆</span>
+                <!-- Clean TBD / BYE text without any trophy icon -->
                 <span [style.color]="match.team_b_id ? '#e2e8f0' : '#64748b'" [style.font-style]="match.team_b_id ? 'normal' : 'italic'" style="font-weight: 600; font-size: 14px;">{{ match.team_b_name || (match.round_number === 1 && match.team_a_id ? 'BYE' : 'TBD') }}</span>
               </div>
               <div *ngIf="!match.isEditing && match.score_b !== null && match.team_b_id" style="font-weight: 700; font-size: 15px; color: #fff;">{{ match.score_b }}</div>
