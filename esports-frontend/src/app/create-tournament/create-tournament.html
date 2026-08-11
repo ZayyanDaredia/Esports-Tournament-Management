@@ -1,0 +1,29 @@
+<div style="max-width: 600px; margin: 40px auto; animation: fadeIn 0.3s ease;">
+  
+  <button (click)="goBack()" style="background: transparent; color: #94a3b8; border: none; font-size: 14px; cursor: pointer; margin-bottom: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+    ← Back to Dashboard
+  </button>
+
+  <div style="background: #151a27; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.03);">
+    <h2 style="margin: 0 0 10px 0; font-size: 24px; color: #fff; font-weight: 700;">Create Tournament</h2>
+    <p style="margin: 0 0 30px 0; color: #64748b; font-size: 14px;">Setup a new competitive event for the platform.</p>
+
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; margin-bottom: 8px; font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Tournament Name</label>
+      <input type="text" [(ngModel)]="adminTourneyName" placeholder="e.g., Summer Championship 2026" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; box-sizing: border-box; font-size: 15px; outline: none;">
+      <div *ngIf="adminTourneySubmitAttempt && !adminTourneyName.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 6px; font-weight: 500;">Name is required</div>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+      <label style="display: block; margin-bottom: 8px; font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Game Title</label>
+      <select [(ngModel)]="adminTourneyGame" style="width: 100%; padding: 14px 18px; background-color: #1c2333; color: #fff; border: 1px solid transparent; border-radius: 12px; box-sizing: border-box; font-size: 15px; outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 18px center; background-size: 12px auto;">
+        <option value="" disabled selected>Select a game</option>
+        <option value="Valorant">Valorant</option>
+        <option value="CS2">CS2</option>
+      </select>
+      <div *ngIf="adminTourneySubmitAttempt && !adminTourneyGame" style="color: #f43f5e; font-size: 12px; margin-top: 6px; font-weight: 500;">Game selection is required</div>
+    </div>
+
+    <button (click)="submitAdminTournament()" style="width: 100%; background: #00d28a; color: #0b0f19; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(0, 210, 138, 0.25);">Launch Tournament</button>
+  </div>
+</div>

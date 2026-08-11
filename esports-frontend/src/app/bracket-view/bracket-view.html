@@ -1,0 +1,219 @@
+<div *ngIf="activeTournament" style="animation: fadeIn 0.3s ease;">
+  
+  <!-- TOURNAMENT HEADER -->
+  <div style="background: #151a27; padding: 30px 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02); margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+    
+    <div>
+      <button (click)="goBack()" style="background: transparent; color: #94a3b8; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding: 0;">
+        ← Back to Dashboard
+      </button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+        <span [style.color]="activeTournament.status === 'REGISTRATION_OPEN' ? '#38bdf8' : (activeTournament.status === 'COMPLETED' ? '#64748b' : '#10b981')" [style.background]="activeTournament.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : (activeTournament.status === 'COMPLETED' ? 'rgba(100, 116, 139, 0.1)' : 'rgba(16, 185, 129, 0.1)')" style="font-size: 11px; padding: 5px 12px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ activeTournament.status }}</span>
+        <span style="font-size: 13px; color: #64748b; font-weight: 600;">ID #{{ activeTournament.tournament_id }}</span>
+      </div>
+      <h2 style="margin: 0 0 8px 0; font-size: 32px; color: #fff; font-weight: 800;">{{ activeTournament.name }}</h2>
+      <p style="margin: 0; font-size: 15px; font-weight: 600;" [style.color]="activeTournament.game_title === 'Valorant' ? '#ff4655' : (activeTournament.game_title === 'CS2' ? '#eab308' : '#94a3b8')">🎮 {{ activeTournament.game_title }}</p>
+    </div>
+
+    <!-- User Action Button (Only show if Registration is Open and user is not Admin) -->
+    <button *ngIf="api.userRole.value === 'user' && activeTournament.status === 'REGISTRATION_OPEN'" (click)="openRegistration()" style="background: #38bdf8; color: #0b0f19; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25);">
+      + Register Team for Event
+    </button>
+  </div>
+
+  <!-- ADMIN TOURNAMENT CONTROLS -->
+  <div *ngIf="api.userRole.value === 'admin' && activeTournament.status !== 'COMPLETED'" style="display: flex; gap: 15px; margin-bottom: 40px; background: #151a27; padding: 25px 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.03);">
+    <button (click)="generateBracket()" style="background: #38bdf8; color: #0b0f19; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25);">Auto-Generate Bracket</button>
+    <button (click)="openManualBracketBuilder()" style="background: #8b5cf6; color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);">Manual Build</button>
+    <button (click)="resetBracket()" style="background: transparent; border: 1px solid rgba(244, 63, 94, 0.5); color: #f43f5e; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px;">Reset Bracket</button>
+  </div>
+
+  <!-- REGISTERED TEAMS -->
+  <div style="margin-bottom: 50px;">
+    <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #fff; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+      Registered Teams <span style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; font-size: 12px; color: #94a3b8;">{{ filteredTeams.length }} Total</span>
+    </h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+      <div *ngFor="let team of filteredTeams; trackBy: trackByTeam" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px;">
+        <span (click)="openTeamModal(team.team_id)" style="font-weight: 600; font-size: 14px; color: #e2e8f0; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#e2e8f0'">🛡️ {{ team.name }}</span>
+        <button *ngIf="api.userRole.value === 'admin'" (click)="deleteTeam(team.team_id)" style="background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 16px; padding: 0; opacity: 0.6; transition: 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">×</button>
+      </div>
+      <div *ngIf="filteredTeams.length === 0" style="color: #64748b; font-size: 14px; font-style: italic; padding: 10px 0;">No teams registered yet.</div>
+    </div>
+  </div>
+
+  <!-- MANUAL BRACKET BUILDER -->
+  <div *ngIf="isManualBracketMode" style="background: #151a27; padding: 30px; border-radius: 20px; border: 1px dashed #8b5cf6; margin-bottom: 40px; animation: fadeIn 0.3s ease;">
+    <h3 style="margin: 0 0 20px 0; color: #fff;">Manual Bracket Builder - Round 1</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 25px;">
+      <div *ngFor="let match of manualMatchups; let i = index" style="background: #0b0f19; padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+        <h4 style="margin: 0 0 15px 0; color: #94a3b8; font-size: 12px; text-transform: uppercase;">Match {{ i + 1 }}</h4>
+        
+        <div style="margin-bottom: 12px;">
+          <select [(ngModel)]="match.team_a_id" style="width: 100%; padding: 10px; background: #1c2333; color: #fff; border: 1px solid transparent; border-radius: 8px; font-size: 14px; outline: none;">
+            <option [ngValue]="null">Select Team A (Required)</option>
+            <option *ngFor="let t of filteredTeams" [ngValue]="t.team_id">{{ t.name }}</option>
+          </select>
+        </div>
+        
+        <div style="text-align: center; color: #64748b; font-size: 12px; margin-bottom: 12px; font-weight: 600;">VS</div>
+        
+        <div>
+          <select [(ngModel)]="match.team_b_id" style="width: 100%; padding: 10px; background: #1c2333; color: #fff; border: 1px solid transparent; border-radius: 8px; font-size: 14px; outline: none;">
+            <option [ngValue]="null">Select Team B (Or leave empty for BYE)</option>
+            <option *ngFor="let t of filteredTeams" [ngValue]="t.team_id">{{ t.name }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 15px;">
+      <button (click)="submitManualBracket()" style="background: #8b5cf6; color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px;">Generate from Selections</button>
+      <button (click)="cancelManualBracket()" style="background: transparent; border: 1px solid #64748b; color: #94a3b8; padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 14px;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- THE BRACKET TREE -->
+  <div *ngIf="rounds.length > 0 && !isManualBracketMode" style="overflow-x: auto; padding: 20px 0; background: #0f1423; border-radius: 24px; border: 1px solid rgba(255,255,255,0.02); min-height: 500px;">
+    <div style="display: flex; min-width: max-content; padding: 40px;">
+      
+      <div *ngFor="let round of rounds; let lastRound = last; trackBy: trackByRound" style="margin-right: 80px; display: flex; flex-direction: column; width: 260px;">
+        <h4 style="text-align: center; color: #94a3b8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 40px 0; font-weight: 700;" [style.color]="lastRound ? '#fbbf24' : '#94a3b8'">{{ round.title }}</h4>
+        
+        <div *ngFor="let match of round.matches; trackBy: trackByMatch" 
+             [style.height.px]="getWrapperHeight(round.roundNumber)"
+             style="display: flex; flex-direction: column; justify-content: center; position: relative; width: 100%;">
+          
+          <div [style.border]="lastRound && match.winner_id ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.05)'" [style.box-shadow]="lastRound && match.winner_id ? '0 0 20px rgba(251, 191, 36, 0.15)' : 'none'" style="background: #1c2333; border-radius: 12px; overflow: hidden; position: relative; z-index: 2;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.02);">
+              <span style="font-size: 10px; font-weight: 700; color: #64748b;">MATCH {{ match.match_id }}</span>
+              <span [style.color]="getMatchStatus(match).color" [style.background]="getMatchStatus(match).bg" style="font-size: 9px; padding: 3px 8px; border-radius: 12px; font-weight: 800; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
+            </div>
+
+            <!-- TEAM A -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.03);" [style.background]="match.winner_id === match.team_a_id ? 'rgba(16, 185, 129, 0.05)' : 'transparent'">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span *ngIf="match.winner_id === match.team_a_id" style="color: #10b981; font-size: 12px;">🏆</span>
+                <span [style.color]="match.team_a_id ? '#e2e8f0' : '#64748b'" [style.font-style]="match.team_a_id ? 'normal' : 'italic'" style="font-weight: 600; font-size: 14px;">{{ match.team_a_name || 'TBD' }}</span>
+              </div>
+              <div *ngIf="!match.isEditing && match.score_a !== null" style="font-weight: 700; font-size: 15px; color: #fff;">{{ match.score_a }}</div>
+              <input *ngIf="match.isEditing" type="number" [(ngModel)]="match.tempScoreA" style="width: 40px; background: rgba(0,0,0,0.3); border: 1px solid #38bdf8; color: #fff; border-radius: 6px; padding: 4px; text-align: center; font-weight: 700; outline: none;">
+            </div>
+
+            <!-- TEAM B -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px;" [style.background]="match.winner_id === match.team_b_id ? 'rgba(16, 185, 129, 0.05)' : 'transparent'">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span *ngIf="match.winner_id === match.team_b_id" style="color: #10b981; font-size: 12px;">🏆</span>
+                <span [style.color]="match.team_b_id ? '#e2e8f0' : '#64748b'" [style.font-style]="match.team_b_id ? 'normal' : 'italic'" style="font-weight: 600; font-size: 14px;">{{ match.team_b_name || (match.team_a_id && !match.team_b_id ? 'BYE' : 'TBD') }}</span>
+              </div>
+              <div *ngIf="!match.isEditing && match.score_b !== null && match.team_b_id" style="font-weight: 700; font-size: 15px; color: #fff;">{{ match.score_b }}</div>
+              <div *ngIf="!match.isEditing && !match.team_b_id" style="font-weight: 700; font-size: 13px; color: #64748b;">-</div>
+              <input *ngIf="match.isEditing && match.team_b_id" type="number" [(ngModel)]="match.tempScoreB" style="width: 40px; background: rgba(0,0,0,0.3); border: 1px solid #38bdf8; color: #fff; border-radius: 6px; padding: 4px; text-align: center; font-weight: 700; outline: none;">
+            </div>
+
+            <!-- Admin Save Controls -->
+            <div *ngIf="match.isEditing && api.userRole.value === 'admin'" style="padding: 10px; background: rgba(56, 189, 248, 0.1); border-top: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between;">
+              <button (click)="match.isEditing = false" style="background: transparent; color: #94a3b8; border: none; font-size: 12px; cursor: pointer;">Cancel</button>
+              <button (click)="updateScore(match)" style="background: #38bdf8; color: #0b0f19; border: none; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 12px; cursor: pointer;">Save Result</button>
+            </div>
+          </div>
+
+          <!-- Edit Button for Admin -->
+          <button *ngIf="api.userRole.value === 'admin' && !match.isEditing && activeTournament.status !== 'COMPLETED'" (click)="enableEditScore(match)" style="position: absolute; right: -30px; background: rgba(255,255,255,0.05); border: none; color: #94a3b8; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#38bdf8'; this.style.color='#0b0f19'" onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#94a3b8'">
+            ✎
+          </button>
+
+          <!-- SVG CONNECTORS -->
+          <svg *ngIf="!lastRound" width="80" [style.height.px]="getVerticalLineHeight(round.roundNumber)" style="position: absolute; right: -80px; top: 50%; z-index: 1;">
+            <path [attr.d]="'M 0 0 L 40 0 L 40 ' + (getVerticalLineHeight(round.roundNumber) / 2) + ' L 80 ' + (getVerticalLineHeight(round.roundNumber) / 2)" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-linejoin="round" />
+          </svg>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="rounds.length === 0 && !isManualBracketMode && !isLoadingMatches" style="text-align: center; padding: 60px; background: #0f1423; border-radius: 24px; border: 1px solid rgba(255,255,255,0.02); color: #64748b;">
+    <span style="font-size: 40px; display: block; margin-bottom: 15px;">🏆</span>
+    <h3 style="margin: 0 0 10px 0; color: #e2e8f0;">No Bracket Generated Yet</h3>
+    <p style="margin: 0; font-size: 14px;">{{ api.userRole.value === 'admin' ? 'Click Auto-Generate Bracket to create the matchups.' : 'Waiting for tournament admin to generate the bracket.' }}</p>
+  </div>
+
+  <!-- REGISTRATION MODAL (FOR USERS) -->
+  <div *ngIf="showRegistrationModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;">
+    <div style="background: #151a27; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); position: relative;">
+      
+      <button (click)="closeRegistration()" style="position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #64748b; font-size: 24px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#f43f5e'" onmouseout="this.style.color='#64748b'">×</button>
+      
+      <h2 style="margin: 0 0 10px 0; color: #fff; font-size: 24px; font-weight: 800;">Team Registration</h2>
+      <p style="color: #94a3b8; font-size: 14px; margin: 0 0 30px 0;">Registering for: <span style="color: #38bdf8; font-weight: 600;">{{ activeTournament.name }}</span></p>
+
+      <div style="display: grid; gap: 15px;">
+        <div>
+          <input type="text" [(ngModel)]="regTeamName" placeholder="Team Name (Required)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;">
+          <div *ngIf="submittedAttempt && !regTeamName.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 4px;">Required</div>
+        </div>
+        
+        <div>
+          <input type="text" [(ngModel)]="regCap" placeholder="Captain In-Game Name (Required)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;">
+          <div *ngIf="submittedAttempt && !regCap.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 4px;">Required</div>
+        </div>
+        <div>
+          <input type="text" [(ngModel)]="regP2" placeholder="Player 2 IGN (Required)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;">
+          <div *ngIf="submittedAttempt && !regP2.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 4px;">Required</div>
+        </div>
+        <div>
+          <input type="text" [(ngModel)]="regP3" placeholder="Player 3 IGN (Required)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;">
+          <div *ngIf="submittedAttempt && !regP3.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 4px;">Required</div>
+        </div>
+        <div>
+          <input type="text" [(ngModel)]="regP4" placeholder="Player 4 IGN (Required)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;">
+          <div *ngIf="submittedAttempt && !regP4.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 4px;">Required</div>
+        </div>
+        <div>
+          <input type="text" [(ngModel)]="regP5" placeholder="Player 5 IGN (Required)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;">
+          <div *ngIf="submittedAttempt && !regP5.trim()" style="color: #f43f5e; font-size: 12px; margin-top: 4px;">Required</div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 10px 0;">
+        
+        <div><input type="text" [(ngModel)]="regSub1" placeholder="Substitute 1 IGN (Optional)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;"></div>
+        <div><input type="text" [(ngModel)]="regSub2" placeholder="Substitute 2 IGN (Optional)" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none;"></div>
+      </div>
+
+      <button (click)="registerFullTeam()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);">Submit Registration</button>
+    </div>
+  </div>
+
+  <!-- TEAM ROSTER MODAL (VIEWING) -->
+  <div *ngIf="selectedTeamRoster" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease;">
+    <div style="background: #151a27; width: 100%; max-width: 450px; border-radius: 24px; padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); position: relative;">
+      
+      <button (click)="closeTeamModal()" style="position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #64748b; font-size: 24px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#f43f5e'" onmouseout="this.style.color='#64748b'">×</button>
+      
+      <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+        🛡️ {{ selectedTeamRoster.team_name }}
+      </h2>
+      <p style="color: #38bdf8; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 25px 0;">Official Roster</p>
+
+      <div style="background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
+          <span style="color: #fbbf24; font-weight: 700; font-size: 14px;">Captain</span>
+          <span style="color: #fff; font-weight: 600; font-size: 15px;">{{ selectedTeamRoster.captain }}</span>
+        </div>
+
+        <div *ngFor="let member of selectedTeamRoster.members" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.02);">
+          <span style="color: #94a3b8; font-weight: 500; font-size: 14px;">Starting Roster</span>
+          <span style="color: #e2e8f0; font-weight: 500; font-size: 15px;">{{ member }}</span>
+        </div>
+
+        <div *ngFor="let sub of selectedTeamRoster.subs" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.02);">
+          <span style="color: #64748b; font-weight: 500; font-size: 14px; font-style: italic;">Substitute</span>
+          <span style="color: #94a3b8; font-weight: 500; font-size: 15px; font-style: italic;">{{ sub }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
