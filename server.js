@@ -127,6 +127,34 @@ app.post('/api/tournaments', verifyAdmin, async (req, res) => {
     }
 });
 
+app.get('/api/tournaments/:id', async (req, res) => {
+    const tournamentId = req.params.id;
+    try {
+        const [tournaments] = await db.execute('SELECT * FROM Tournaments WHERE tournament_id = ?', [tournamentId]);
+        if (tournaments.length === 0) return res.status(404).json({ error: 'Tournament not found' });
+        res.status(200).json(tournaments[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/tournaments/:id/teams', async (req, res) => {
+    const tournamentId = req.params.id;
+    try {
+        const query = `
+            SELECT Teams.team_id, Teams.name AS team_name, Players.riot_id AS captain_riot_id, Teams.tournament_id, Teams.user_id
+            FROM Teams 
+            JOIN Players ON Teams.captain_id = Players.player_id
+            WHERE Teams.tournament_id = ?
+        `;
+        const [teams] = await db.execute(query, [tournamentId]);
+        res.status(200).json(teams);
+    } catch (error) {
+        console.error('Fetch tournament teams error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // ==========================================
 // BALANCED BRACKET GENERATOR (POWER OF 2 PADDING)
 // ==========================================
