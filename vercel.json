@@ -4,14 +4,12 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["esports-frontend/dist/**"]
+      }
     }
   ],
-  "functions": {
-    "server.js": {
-      "includeFiles": "esports-frontend/dist/**"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
