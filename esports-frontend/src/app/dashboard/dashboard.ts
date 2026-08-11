@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Subscription, timer } from 'rxjs';
 import { ApiService } from '../api';
 
 @Component({
@@ -11,11 +12,11 @@ import { ApiService } from '../api';
   imports: [CommonModule, FormsModule],
   templateUrl: './dashboard.html'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   http = inject(HttpClient);
   router = inject(Router);
   api = inject(ApiService);
-  cdr = inject(ChangeDetectorRef); // <-- Added the manual UI updater
+  cdr = inject(ChangeDetectorRef);
 
   tournaments: any[] = [];
   teams: any[] = [];
@@ -27,6 +28,7 @@ export class DashboardComponent implements OnInit {
   tournamentView: 'all' | 'my' = 'all';
 
   isLoadingTournaments: boolean = false;
+  private pollSub?: Subscription;
 
   ngOnInit() {
     if (!this.api.userRole.value) {
@@ -36,6 +38,18 @@ export class DashboardComponent implements OnInit {
     
     this.fetchTournaments();
     this.fetchTeams();
+
+    // Continuous background polling every 4 seconds to sync updates silently
+    this.pollSub = timer(4000, 4000).subscribe(() => {
+      this.fetchTournamentsQuietly();
+      this.fetchTeamsQuietly();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.pollSub) {
+      this.pollSub.unsubscribe();
+    }
   }
 
   fetchTournaments() {
@@ -45,11 +59,21 @@ export class DashboardComponent implements OnInit {
         this.tournaments = data; 
         this.updateVisibleTournaments();
         this.isLoadingTournaments = false;
-        this.cdr.detectChanges(); // <-- Forces the UI to show the tournaments immediately
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoadingTournaments = false;
         this.api.showToast('Failed to load tournaments', 'error');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  fetchTournamentsQuietly() {
+    this.http.get<any[]>('/api/tournaments').subscribe({
+      next: (data) => { 
+        this.tournaments = data; 
+        this.updateVisibleTournaments();
         this.cdr.detectChanges();
       }
     });
@@ -60,7 +84,17 @@ export class DashboardComponent implements OnInit {
       next: (data) => { 
         this.teams = data; 
         this.updateVisibleTournaments();
-        this.cdr.detectChanges(); // <-- Forces the UI to update
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  fetchTeamsQuietly() {
+    this.http.get<any[]>('/api/teams').subscribe({
+      next: (data) => { 
+        this.teams = data; 
+        this.updateVisibleTournaments();
+        this.cdr.detectChanges();
       }
     });
   }
