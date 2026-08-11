@@ -6,7 +6,10 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["esports-frontend/dist/esports-frontend/browser/**"]
+        "includeFiles": [
+          "esports-frontend/dist/**",
+          "dist/**"
+        ]
       }
     }
   ],
