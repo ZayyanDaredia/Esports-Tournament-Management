@@ -155,11 +155,26 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   isMatchReady(match: any): boolean {
-    return !!(
-      (match.team_a_id && match.team_b_id) ||                  // Both teams present
-      (match.round_number === 1 && match.team_a_id) ||          // Round 1 match/BYE
-      (match.team_a_id && Number(match.feeder_count) === 1)     // Single-feeder carryover match
-    );
+    if (match.team_a_id && match.team_b_id) return true;
+    if (match.round_number === 1 && match.team_a_id) return true;
+
+    // If Team A is present but Team B is missing, check if Feeder B is finished or permanently empty
+    if (match.team_a_id && !match.team_b_id) {
+      if (!match.feederB) return true;
+      if (match.feederB.winner_id !== null || (match.feederB.team_a_id === null && match.feederB.team_b_id === null)) {
+        return true;
+      }
+    }
+
+    // If Team B is present but Team A is missing, check if Feeder A is finished or permanently empty
+    if (match.team_b_id && !match.team_a_id) {
+      if (!match.feederA) return true;
+      if (match.feederA.winner_id !== null || (match.feederA.team_a_id === null && match.feederA.team_b_id === null)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   enableEditScore(match: any) {

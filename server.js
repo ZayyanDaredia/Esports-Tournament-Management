@@ -474,6 +474,23 @@ app.get('/api/tournaments/:id/bracket', async (req, res) => {
         `;
         const [matches] = await db.execute(query, [tournamentId]);
         
+        const [feeders] = await db.execute(`
+            SELECT match_id, next_match_id, winner_id, team_a_id, team_b_id 
+            FROM Matches WHERE tournament_id = ?
+        `, [tournamentId]);
+
+        const feederMap = {};
+        feeders.forEach(f => {
+            if (!feederMap[f.next_match_id]) feederMap[f.next_match_id] = [];
+            feederMap[f.next_match_id].push(f);
+        });
+
+        matches.forEach(m => {
+            const incomingFeeders = feederMap[m.match_id] || [];
+            m.feederA = incomingFeeders[0] || null;
+            m.feederB = incomingFeeders[1] || null;
+        });
+
         const roundsMap = {};
         matches.forEach(m => {
             const rNum = m.round_number;
