@@ -71,6 +71,10 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     this.http.get<any>(`/api/tournaments/${this.tournamentId}`).subscribe({
       next: (data) => {
         this.activeTournament = data;
+        this.cdr.detectChanges(); // Forces Angular to render the view immediately
+      },
+      error: (err) => {
+        this.api.showToast('Failed to load tournament details', 'error');
         this.cdr.detectChanges();
       }
     });
