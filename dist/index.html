@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-beasties-container>
+<head>
+  <meta charset="utf-8">
+  <title>EsportsFrontend</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- HARD ANTI-CACHE META TAGS -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <!-- THE ULTIMATE WHITE-SCREEN FAILSAFE -->
+  <script>
+    // This script catches errors when the browser stubbornly tries to load old, deleted JS files
+    window.addEventListener('error', function(e) {
+      const target = e.target || e.srcElement;
+      const isScript = target && target.nodeName === 'SCRIPT';
+      
+      if (isScript) {
+        console.warn('Detected outdated cached script. Forcing automatic hard reload...');
+        
+        // Prevent infinite reload loops just in case
+        const reloadFlag = 'app_reloaded_due_to_cache';
+        if (!sessionStorage.getItem(reloadFlag)) {
+          sessionStorage.setItem(reloadFlag, 'true');
+          
+          // Force the browser to bypass cache by adding a unique timestamp to the URL
+          window.location.href = window.location.pathname + '?v=' + new Date().getTime();
+        }
+      }
+    }, true);
+
+    // Clear the fail-safe flag once the app successfully loads
+    window.onload = function() {
+      sessionStorage.removeItem('app_reloaded_due_to_cache');
+    };
+  </script>
+<style>body{margin:0;padding:0;background-color:#0b0f19}</style><link rel="stylesheet" href="styles-FEUVVGEI.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles-FEUVVGEI.css"></noscript></head>
+<body>
+  <app-root></app-root>
+<script src="main-3XLKAXZV.js" type="module"></script></body>
+</html>

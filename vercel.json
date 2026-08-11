@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd esports-frontend && npm install && npm run build && cd .. && mkdir -p dist && cp -r esports-frontend/dist/esports-frontend/browser/* dist/",
+  "buildCommand": "node build.js",
   "builds": [
     {
       "src": "server.js",
