@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "cd esports-frontend && npm install && npm run build",
   "builds": [
     {
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["esports-frontend/dist/**"]
+        "includeFiles": ["esports-frontend/dist/esports-frontend/browser/**"]
       }
     }
   ],
@@ -31,8 +31,12 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "destination": "server.js"
+    },
+    {
       "src": "/(.*)",
-      "destination": "/server.js"
+      "destination": "server.js"
     }
   ]
 }
