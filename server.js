@@ -470,7 +470,8 @@ app.get('/api/tournaments/:id/bracket', async (req, res) => {
             SELECT 
                 m.match_id, m.round_number, m.team_a_id, tA.name AS team_a_name,
                 m.score_a, m.team_b_id, tB.name AS team_b_name, m.score_b,
-                m.winner_id, m.next_match_id
+                m.winner_id, m.next_match_id,
+                (SELECT COUNT(*) FROM Matches f WHERE f.next_match_id = m.match_id) AS feeder_count
             FROM Matches m
             LEFT JOIN Teams tA ON m.team_a_id = tA.team_id
             LEFT JOIN Teams tB ON m.team_b_id = tB.team_id

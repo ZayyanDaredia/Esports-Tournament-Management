@@ -150,14 +150,21 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
   getMatchStatus(match: any) {
     if (match.winner_id) return { label: 'COMPLETED', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' };
-    if (match.team_a_id && match.team_b_id) return { label: 'LIVE', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.1)' };
+    if (this.isMatchReady(match)) return { label: 'LIVE', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.1)' };
     return { label: 'UPCOMING', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.1)' };
   }
 
+  isMatchReady(match: any): boolean {
+    return !!(
+      (match.team_a_id && match.team_b_id) ||                  // Both teams present
+      (match.round_number === 1 && match.team_a_id) ||          // Round 1 match/BYE
+      (match.team_a_id && Number(match.feeder_count) === 1)     // Single-feeder carryover match
+    );
+  }
+
   enableEditScore(match: any) {
-    const isReady = (match.team_a_id && match.team_b_id) || (match.round_number === 1 && match.team_a_id);
-    if (!isReady) {
-      this.api.showToast('Cannot edit score until both teams are present.', 'error');
+    if (!this.isMatchReady(match)) {
+      this.api.showToast('Cannot edit score until opponent is determined.', 'error');
       return;
     }
     match.isEditing = true;
