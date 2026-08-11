@@ -478,14 +478,23 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         await connection.execute('UPDATE Matches SET score_a = ?, score_b = ?, winner_id = ? WHERE match_id = ?', [score_a, score_b, winner_id, matchId]);
 
         if (nextMatchId) {
-            const [nextMatchRows] = await connection.execute('SELECT team_a_id, team_b_id FROM Matches WHERE match_id = ?', [nextMatchId]);
-            if (nextMatchRows.length > 0) {
-                const nextMatch = nextMatchRows[0];
-                if (nextMatch.team_a_id === null) {
-                    await connection.execute('UPDATE Matches SET team_a_id = ? WHERE match_id = ?', [winner_id, nextMatchId]);
-                } else if (nextMatch.team_b_id === null) {
-                    await connection.execute('UPDATE Matches SET team_b_id = ? WHERE match_id = ?', [winner_id, nextMatchId]);
+            // Strictly map lower match_id to team_a_id and higher match_id to team_b_id of the next match
+            const [feedingMatches] = await connection.execute(
+                'SELECT match_id FROM Matches WHERE next_match_id = ? ORDER BY match_id ASC',
+                [nextMatchId]
+            );
+
+            let targetColumn = null;
+            if (feedingMatches.length > 0) {
+                if (feedingMatches[0].match_id == matchId) {
+                    targetColumn = 'team_a_id';
+                } else if (feedingMatches.length > 1 && feedingMatches[1].match_id == matchId) {
+                    targetColumn = 'team_b_id';
                 }
+            }
+
+            if (targetColumn) {
+                await connection.execute(`UPDATE Matches SET ${targetColumn} = ? WHERE match_id = ?`, [winner_id, nextMatchId]);
             }
         } else {
             await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['COMPLETED', tournamentId]);
