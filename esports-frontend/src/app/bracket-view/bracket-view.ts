@@ -71,10 +71,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     this.http.get<any>(`/api/tournaments/${this.tournamentId}`).subscribe({
       next: (data) => {
         this.activeTournament = data;
-        this.cdr.detectChanges(); // Forces Angular to render the view immediately
-      },
-      error: (err) => {
-        this.api.showToast('Failed to load tournament details', 'error');
         this.cdr.detectChanges();
       }
     });
@@ -220,7 +216,7 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
   resetBracket() {
     if (confirm('Are you sure you want to reset the bracket? All progress will be lost.')) {
-      this.http.post(`/api/tournaments/${this.tournamentId}/reset-bracket`, {}, this.api.getAuthHeaders()).subscribe({
+      this.http.delete(`/api/tournaments/${this.tournamentId}/bracket`, this.api.getAuthHeaders()).subscribe({
         next: () => {
           this.loadBracket();
           this.loadTournamentDetails();
@@ -247,7 +243,7 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   submitManualBracket() {
-    this.http.post(`/api/tournaments/${this.tournamentId}/manual-bracket`, { matchups: this.manualMatchups }, this.api.getAuthHeaders()).subscribe({
+    this.http.post(`/api/tournaments/${this.tournamentId}/generate-manual-bracket`, { matchups: this.manualMatchups }, this.api.getAuthHeaders()).subscribe({
       next: () => {
         this.isManualBracketMode = false;
         this.loadBracket();
@@ -300,10 +296,12 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     const payload = {
       tournament_id: this.tournamentId,
       team_name: this.regTeamName,
-      players: [this.regCap, this.regP2, this.regP3, this.regP4, this.regP5, this.regSub1, this.regSub2].filter(p => p.trim() !== '')
+      captain: this.regCap,
+      members: [this.regP2, this.regP3, this.regP4, this.regP5].filter(p => p.trim() !== ''),
+      subs: [this.regSub1, this.regSub2].filter(p => p.trim() !== '')
     };
 
-    this.http.post('/api/teams', payload, this.api.getAuthHeaders()).subscribe({
+    this.http.post('/api/teams/bulk', payload, this.api.getAuthHeaders()).subscribe({
       next: () => {
         this.closeRegistration();
         this.loadTeams();

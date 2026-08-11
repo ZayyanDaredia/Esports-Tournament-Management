@@ -114,19 +114,6 @@ app.get('/api/tournaments', async (req, res) => {
     }
 });
 
-app.post('/api/tournaments', verifyAdmin, async (req, res) => {
-    const { name, game_title, start_date } = req.body;
-    if (!name) return res.status(400).json({ error: 'Tournament name required' });
-
-    try {
-        const game = game_title || 'Valorant';
-        const [result] = await db.execute('INSERT INTO Tournaments (name, game_title, start_date, status) VALUES (?, ?, ?, ?)', [name, game, start_date || null, 'REGISTRATION_OPEN']);
-        res.status(201).json({ message: 'Tournament created successfully!', tournamentId: result.insertId });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
 app.get('/api/tournaments/:id', async (req, res) => {
     const tournamentId = req.params.id;
     try {
@@ -138,19 +125,15 @@ app.get('/api/tournaments/:id', async (req, res) => {
     }
 });
 
-app.get('/api/tournaments/:id/teams', async (req, res) => {
-    const tournamentId = req.params.id;
+app.post('/api/tournaments', verifyAdmin, async (req, res) => {
+    const { name, game_title, start_date } = req.body;
+    if (!name) return res.status(400).json({ error: 'Tournament name required' });
+
     try {
-        const query = `
-            SELECT Teams.team_id, Teams.name AS team_name, Players.riot_id AS captain_riot_id, Teams.tournament_id, Teams.user_id
-            FROM Teams 
-            JOIN Players ON Teams.captain_id = Players.player_id
-            WHERE Teams.tournament_id = ?
-        `;
-        const [teams] = await db.execute(query, [tournamentId]);
-        res.status(200).json(teams);
+        const game = game_title || 'Valorant';
+        const [result] = await db.execute('INSERT INTO Tournaments (name, game_title, start_date, status) VALUES (?, ?, ?, ?)', [name, game, start_date || null, 'REGISTRATION_OPEN']);
+        res.status(201).json({ message: 'Tournament created successfully!', tournamentId: result.insertId });
     } catch (error) {
-        console.error('Fetch tournament teams error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -175,7 +158,6 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
 
         const shuffledTeams = teams.sort(() => Math.random() - 0.5);
 
-        // Calculate target power of 2 bracket size (e.g., 5 or 6 teams -> 8 slots)
         let bracketSize = 2;
         while (bracketSize < shuffledTeams.length) {
             bracketSize *= 2;
@@ -184,13 +166,11 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
         const numRounds = Math.log2(bracketSize);
         let matchesByRound = [];
 
-        // Build structure of rounds from bottom (Round 1) to top (Finals)
         for (let r = 1; r <= numRounds; r++) {
             const matchCount = bracketSize / Math.pow(2, r);
             matchesByRound.push({ round: r, matches: Array(matchCount).fill(null) });
         }
 
-        // Insert matches and link next_match_id relationships symmetrically
         for (let r = numRounds; r >= 1; r--) {
             const roundIndex = r - 1;
             const matchCount = matchesByRound[roundIndex].matches.length;
@@ -212,7 +192,6 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
             matchesByRound[roundIndex].matches = createdMatchIds;
         }
 
-        // Assign teams to Round 1 slots, padding missing slots with null (BYEs)
         const round1Matches = matchesByRound[0].matches;
         for (let i = 0; i < round1Matches.length; i++) {
             const teamA = shuffledTeams[i * 2] ? shuffledTeams[i * 2].team_id : null;
@@ -224,7 +203,6 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
                 [teamA, teamB, matchId]
             );
 
-            // Auto-advance teamA if teamB is a BYE (null)
             if (teamA && !teamB) {
                 const [matchRow] = await connection.execute('SELECT next_match_id FROM Matches WHERE match_id = ?', [matchId]);
                 const nextMatchId = matchRow[0].next_match_id;
@@ -368,6 +346,23 @@ app.get('/api/teams', async (req, res) => {
     }
 });
 
+app.get('/api/tournaments/:id/teams', async (req, res) => {
+    const tournamentId = req.params.id;
+    try {
+        const query = `
+            SELECT Teams.team_id, Teams.name AS team_name, Players.riot_id AS captain_riot_id, Teams.tournament_id, Teams.user_id
+            FROM Teams 
+            JOIN Players ON Teams.captain_id = Players.player_id
+            WHERE Teams.tournament_id = ?
+        `;
+        const [teams] = await db.execute(query, [tournamentId]);
+        res.status(200).json(teams);
+    } catch (error) {
+        console.error('Fetch tournament teams error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/api/teams/:id/roster', async (req, res) => {
     const teamId = req.params.id;
     try {
@@ -484,7 +479,6 @@ app.get('/api/tournaments/:id/bracket', async (req, res) => {
         `;
         const [matches] = await db.execute(query, [tournamentId]);
         
-        // Group matches by round number to match the frontend expectations
         const roundsMap = {};
         matches.forEach(m => {
             const rNum = m.round_number;
