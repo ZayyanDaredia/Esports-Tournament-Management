@@ -286,14 +286,29 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
   // --- TEAM ROSTER MODAL ---
   openTeamModal(team: any) {
-    // 1. Immediately show known data so the modal is never completely blank
+    let parsedMembers = [];
+    let parsedSubs = [];
+    
+    try { 
+      parsedMembers = typeof team.members === 'string' ? JSON.parse(team.members) : (team.members || []); 
+    } catch(e) { parsedMembers = []; }
+
+    try { 
+      parsedSubs = typeof team.subs === 'string' ? JSON.parse(team.subs) : (team.subs || []); 
+    } catch(e) { parsedSubs = []; }
+
     this.selectedTeamRoster = {
-      team_name: team.team_name || team.name || 'Unknown Team',
-      captain: team.captain || 'Loading roster data...',
-      members: [],
-      subs: []
+      team_name: team.team_name || team.name || 'Unnamed Team',
+      captain: team.captain || 'Not Listed',
+      members: parsedMembers,
+      subs: parsedSubs
     };
     this.cdr.detectChanges();
+  }
+
+  closeTeamModal() { 
+    this.selectedTeamRoster = null; 
+  }
 
     // 2. Fetch the deep data
     this.http.get<any>(`/api/teams/${team.team_id}/roster`).subscribe({
