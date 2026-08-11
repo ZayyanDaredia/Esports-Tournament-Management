@@ -321,25 +321,30 @@ app.get('/api/teams/:id/roster', async (req, res) => {
         
         if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
         
+        // ORDER BY p.player_id ASC guarantees exact registration order is preserved
         const [players] = await db.execute(`
             SELECT p.riot_id 
             FROM Team_Rosters tr 
             JOIN Players p ON tr.player_id = p.player_id 
             WHERE tr.team_id = ?
+            ORDER BY p.player_id ASC
         `, [teamId]);
 
         const captainName = teamRows[0].captain || 'Not Listed';
         
-        // Extract all players excluding the captain
-        const otherPlayers = players
-            .map(p => p.riot_id)
-            .filter(name => name !== captainName);
+        // Collect unique player names excluding the captain, keeping exact order
+        const allPlayerNames = [];
+        players.forEach(p => {
+            if (p.riot_id && p.riot_id !== captainName && !allPlayerNames.includes(p.riot_id)) {
+                allPlayerNames.push(p.riot_id);
+            }
+        });
 
-        // First 4 players after the captain make up the starting 5 members
-        const members = otherPlayers.slice(0, 4);
+        // Exactly 4 starting players after the captain
+        const members = allPlayerNames.slice(0, 4);
         
-        // Any remaining players (6th and 7th) are categorized as substitutes
-        const subs = otherPlayers.slice(4);
+        // Any remaining players are correctly categorized as substitutes
+        const subs = allPlayerNames.slice(4);
 
         res.status(200).json({
             team_name: teamRows[0].team_name,
