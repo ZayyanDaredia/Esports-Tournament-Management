@@ -9,7 +9,7 @@ import { ApiService } from '../api';
   selector: 'app-auth',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './auth.component.html'
+  templateUrl: './auth.html'
 })
 export class AuthComponent implements OnInit {
   http = inject(HttpClient);
