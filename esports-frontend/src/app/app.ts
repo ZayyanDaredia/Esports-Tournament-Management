@@ -205,6 +205,7 @@ export class App implements OnInit, OnDestroy {
     }
   }
 
+  // Registration Dropdown Filter
   get openTournaments() {
     return this.tournaments.filter(t => t.status === 'REGISTRATION_OPEN');
   }
@@ -328,6 +329,18 @@ export class App implements OnInit, OnDestroy {
         matches: roundMap.get(r)!
       };
     });
+  }
+
+  // ==========================================
+  // BRACKET CONNECTOR MATH FUNCTIONS
+  // ==========================================
+  getWrapperHeight(roundNumber: number): number {
+    // Dynamically scale the wrapper height for each round to align lines perfectly
+    return 240 * Math.pow(2, roundNumber - 1);
+  }
+
+  getVerticalLineHeight(roundNumber: number): number {
+    return this.getWrapperHeight(roundNumber);
   }
 
   submitAdminTournament() {
