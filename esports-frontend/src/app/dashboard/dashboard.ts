@@ -39,7 +39,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.fetchTournaments();
     this.fetchTeams();
 
-    // Continuous background polling every 4 seconds to sync updates silently
     this.pollSub = timer(4000, 4000).subscribe(() => {
       this.fetchTournamentsQuietly();
       this.fetchTeamsQuietly();

@@ -127,6 +127,9 @@ app.post('/api/tournaments', verifyAdmin, async (req, res) => {
     }
 });
 
+// ==========================================
+// BALANCED BRACKET GENERATOR (POWER OF 2 PADDING)
+// ==========================================
 app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) => {
     const tournamentId = req.params.id;
     const connection = await db.getConnection();
@@ -143,45 +146,73 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
         }
 
         const shuffledTeams = teams.sort(() => Math.random() - 0.5);
-        let roundNum = 1;
-        let currentRoundMatchIds = [];
 
-        for (let i = 0; i < shuffledTeams.length; i += 2) {
-            const teamA = shuffledTeams[i].team_id;
-            const teamB = (i + 1 < shuffledTeams.length) ? shuffledTeams[i + 1].team_id : null;
-
-            const [mRes] = await connection.execute(
-                'INSERT INTO Matches (tournament_id, round_number, team_a_id, team_b_id, winner_id, score_a, score_b) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [tournamentId, roundNum, teamA, teamB, null, 0, 0]
-            );
-            currentRoundMatchIds.push(mRes.insertId);
+        // Calculate target power of 2 bracket size (e.g., 5 or 6 teams -> 8 slots)
+        let bracketSize = 2;
+        while (bracketSize < shuffledTeams.length) {
+            bracketSize *= 2;
         }
 
-        let prevRoundIds = currentRoundMatchIds;
-        while (prevRoundIds.length > 1) {
-            roundNum++;
-            const nextRoundIds = [];
-            for (let i = 0; i < prevRoundIds.length; i += 2) {
-                const [nextRes] = await connection.execute(
-                    'INSERT INTO Matches (tournament_id, round_number) VALUES (?, ?)',
-                    [tournamentId, roundNum]
-                );
-                const nextMatchId = nextRes.insertId;
-                nextRoundIds.push(nextMatchId);
+        const numRounds = Math.log2(bracketSize);
+        let matchesByRound = [];
 
-                await connection.execute('UPDATE Matches SET next_match_id = ? WHERE match_id IN (?, ?)', [
-                    nextMatchId,
-                    prevRoundIds[i],
-                    prevRoundIds[i + 1] || prevRoundIds[i]
-                ]);
+        // Build structure of rounds from bottom (Round 1) to top (Finals)
+        for (let r = 1; r <= numRounds; r++) {
+            const matchCount = bracketSize / Math.pow(2, r);
+            matchesByRound.push({ round: r, matches: Array(matchCount).fill(null) });
+        }
+
+        // Insert matches and link next_match_id relationships symmetrically
+        for (let r = numRounds; r >= 1; r--) {
+            const roundIndex = r - 1;
+            const matchCount = matchesByRound[roundIndex].matches.length;
+            const createdMatchIds = [];
+
+            for (let i = 0; i < matchCount; i++) {
+                let nextMatchId = null;
+                if (r > 1) {
+                    const parentMatchIndex = Math.floor(i / 2);
+                    nextMatchId = matchesByRound[roundIndex - 1].matches[parentMatchIndex];
+                }
+
+                const [mRes] = await connection.execute(
+                    'INSERT INTO Matches (tournament_id, round_number, next_match_id, score_a, score_b) VALUES (?, ?, ?, 0, 0)',
+                    [tournamentId, r, nextMatchId]
+                );
+                createdMatchIds.push(mRes.insertId);
             }
-            prevRoundIds = nextRoundIds;
+            matchesByRound[roundIndex].matches = createdMatchIds;
+        }
+
+        // Assign teams to Round 1 slots, padding missing slots with null (BYEs)
+        const round1Matches = matchesByRound[0].matches;
+        for (let i = 0; i < round1Matches.length; i++) {
+            const teamA = shuffledTeams[i * 2] ? shuffledTeams[i * 2].team_id : null;
+            const teamB = shuffledTeams[i * 2 + 1] ? shuffledTeams[i * 2 + 1].team_id : null;
+            const matchId = round1Matches[i];
+
+            await connection.execute(
+                'UPDATE Matches SET team_a_id = ?, team_b_id = ? WHERE match_id = ?',
+                [teamA, teamB, matchId]
+            );
+
+            // Auto-advance teamA if teamB is a BYE (null)
+            if (teamA && !teamB) {
+                const [matchRow] = await connection.execute('SELECT next_match_id FROM Matches WHERE match_id = ?', [matchId]);
+                const nextMatchId = matchRow[0].next_match_id;
+                if (nextMatchId) {
+                    const [feeders] = await connection.execute('SELECT match_id FROM Matches WHERE next_match_id = ? ORDER BY match_id ASC', [nextMatchId]);
+                    const targetCol = feeders[0].match_id == matchId ? 'team_a_id' : 'team_b_id';
+                    await connection.execute(`UPDATE Matches SET ${targetCol} = ? WHERE match_id = ?`, [teamA, nextMatchId]);
+                    await connection.execute('UPDATE Matches SET winner_id = ? WHERE match_id = ?', [teamA, matchId]);
+                }
+            }
         }
 
         await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['ONGOING', tournamentId]);
         await connection.commit();
 
-        res.status(201).json({ message: 'Single elimination bracket generated successfully!' });
+        res.status(201).json({ message: 'Balanced single elimination bracket generated successfully!' });
     } catch (error) {
         await connection.rollback();
         console.error(error);
@@ -321,7 +352,6 @@ app.get('/api/teams/:id/roster', async (req, res) => {
         
         if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
         
-        // ORDER BY p.player_id ASC guarantees exact registration order is preserved
         const [players] = await db.execute(`
             SELECT p.riot_id 
             FROM Team_Rosters tr 
@@ -331,8 +361,6 @@ app.get('/api/teams/:id/roster', async (req, res) => {
         `, [teamId]);
 
         const captainName = teamRows[0].captain || 'Not Listed';
-        
-        // Collect unique player names excluding the captain, keeping exact order
         const allPlayerNames = [];
         players.forEach(p => {
             if (p.riot_id && p.riot_id !== captainName && !allPlayerNames.includes(p.riot_id)) {
@@ -340,10 +368,7 @@ app.get('/api/teams/:id/roster', async (req, res) => {
             }
         });
 
-        // Exactly 4 starting players after the captain
         const members = allPlayerNames.slice(0, 4);
-        
-        // Any remaining players are correctly categorized as substitutes
         const subs = allPlayerNames.slice(4);
 
         res.status(200).json({
@@ -459,7 +484,6 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         const tournamentId = currentMatch.tournament_id;
         const nextMatchId = currentMatch.next_match_id;
 
-        // Automatically assign winner if it's a BYE match (team_b_id is null)
         if (!currentMatch.team_b_id) {
             winner_id = currentMatch.team_a_id;
         }
@@ -478,7 +502,6 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         await connection.execute('UPDATE Matches SET score_a = ?, score_b = ?, winner_id = ? WHERE match_id = ?', [score_a, score_b, winner_id, matchId]);
 
         if (nextMatchId) {
-            // Strictly map lower match_id to team_a_id and higher match_id to team_b_id of the next match
             const [feedingMatches] = await connection.execute(
                 'SELECT match_id FROM Matches WHERE next_match_id = ? ORDER BY match_id ASC',
                 [nextMatchId]
