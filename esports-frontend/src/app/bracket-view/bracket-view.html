@@ -133,7 +133,7 @@
             <div *ngIf="match.isEditing && api.userRole.value === 'admin'" style="padding: 10px; background: rgba(56, 189, 248, 0.1); border-top: 1px solid rgba(56, 189, 248, 0.2); display: flex; justify-content: space-between; align-items: center;">
               <button (click)="match.isEditing = false" style="background: transparent; color: #94a3b8; border: none; font-size: 12px; cursor: pointer;">Cancel</button>
               
-              <!-- Allow saving if Team A exists (fully supports BYE matches where Team B is null) -->
+              <!-- Allow saving as long as Team A exists (fully supports BYE matches) -->
               <button *ngIf="match.team_a_id" (click)="updateScore(match)" style="background: #38bdf8; color: #0b0f19; border: none; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 12px; cursor: pointer;">Save Result</button>
               <span *ngIf="!match.team_a_id" style="font-size: 11px; color: #f43f5e; font-weight: 600;">Waiting for teams...</span>
             </div>
