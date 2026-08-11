@@ -287,8 +287,26 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   // --- TEAM ROSTER MODAL ---
   openTeamModal(teamId: number) {
     this.http.get<any>(`/api/teams/${teamId}/roster`).subscribe({
-      next: (data) => { this.selectedTeamRoster = data; this.cdr.detectChanges(); },
-      error: () => {}
+      next: (data) => { 
+        // 1. If the database wrapped the response in an array, extract the first item
+        let teamData = Array.isArray(data) ? data[0] : data;
+        
+        if (teamData) {
+          // 2. If the database returned the members/subs arrays as JSON strings, parse them back into actual arrays
+          if (typeof teamData.members === 'string') {
+            try { teamData.members = JSON.parse(teamData.members); } catch(e) { teamData.members = []; }
+          }
+          if (typeof teamData.subs === 'string') {
+            try { teamData.subs = JSON.parse(teamData.subs); } catch(e) { teamData.subs = []; }
+          }
+          this.selectedTeamRoster = teamData;
+        }
+        
+        this.cdr.detectChanges(); 
+      },
+      error: () => {
+        this.api.showToast('Failed to load team roster', 'error');
+      }
     });
   }
   closeTeamModal() { this.selectedTeamRoster = null; }

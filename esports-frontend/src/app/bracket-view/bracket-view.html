@@ -30,7 +30,7 @@
   <!-- REGISTERED TEAMS -->
   <div style="margin-bottom: 50px; background: #151a27; padding: 35px 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
     <h3 style="margin: 0 0 25px 0; font-size: 20px; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
-      Registered Roster
+      Registered Teams
       <span style="background: #38bdf8; padding: 6px 14px; border-radius: 20px; font-size: 13px; color: #0b0f19; font-weight: 800;">{{ filteredTeams.length }} Teams</span>
     </h3>
     
@@ -214,7 +214,7 @@
       <button (click)="closeTeamModal()" style="position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #64748b; font-size: 24px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#f43f5e'" onmouseout="this.style.color='#64748b'">×</button>
       
       <h2 style="margin: 0 0 5px 0; color: #fff; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-        🛡️ {{ selectedTeamRoster.team_name }}
+        🛡️ {{ selectedTeamRoster.team_name || selectedTeamRoster.name || 'Unknown Team' }}
       </h2>
       <p style="color: #38bdf8; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 25px 0;">Official Roster</p>
 
