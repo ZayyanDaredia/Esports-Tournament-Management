@@ -218,7 +218,13 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  enableEditScore(match: any) { match.isEditing = true; }
+  enableEditScore(match: any) { 
+    if (!match.team_a_id || !match.team_b_id) {
+      this.api.showToast('Cannot edit score until both teams are determined.', 'error');
+      return;
+    }
+    match.isEditing = true; 
+  }
 
   updateScore(match: any) {
     const a = parseInt(match.tempScoreA), b = parseInt(match.tempScoreB);
