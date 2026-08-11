@@ -328,15 +328,24 @@ app.get('/api/teams/:id/roster', async (req, res) => {
             WHERE tr.team_id = ?
         `, [teamId]);
 
-        const allPlayers = players.map(p => p.riot_id);
-        const captain = teamRows[0].captain || 'Not Listed';
-        const members = allPlayers.filter(name => name !== captain);
+        const captainName = teamRows[0].captain || 'Not Listed';
+        
+        // Extract all players excluding the captain
+        const otherPlayers = players
+            .map(p => p.riot_id)
+            .filter(name => name !== captainName);
+
+        // First 4 players after the captain make up the starting 5 members
+        const members = otherPlayers.slice(0, 4);
+        
+        // Any remaining players (6th and 7th) are categorized as substitutes
+        const subs = otherPlayers.slice(4);
 
         res.status(200).json({
             team_name: teamRows[0].team_name,
-            captain: captain,
+            captain: captainName,
             members: members,
-            subs: []
+            subs: subs
         });
     } catch (error) {
         console.error('Roster error:', error);
