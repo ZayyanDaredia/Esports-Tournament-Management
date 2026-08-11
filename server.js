@@ -312,28 +312,34 @@ app.get('/api/teams', async (req, res) => {
 app.get('/api/teams/:id/roster', async (req, res) => {
     const teamId = req.params.id;
     try {
-        const [teamRows] = await db.execute('SELECT * FROM Teams WHERE team_id = ?', [teamId]);
-        if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
-        const [players] = await db.execute('SELECT p.riot_id, p.email FROM Team_Rosters tr JOIN Players p ON tr.player_id = p.player_id WHERE tr.team_id = ?', [teamId]);
+        const [teamRows] = await db.execute(`
+            SELECT t.team_id, t.name as team_name, p.riot_id as captain, t.tournament_id, t.user_id 
+            FROM Teams t 
+            LEFT JOIN Players p ON t.captain_id = p.player_id 
+            WHERE t.team_id = ?
+        `, [teamId]);
         
-        // FIX: Corrected column name alias (team_b_name) so match history properly flows to frontend UI
-        const [matches] = await db.execute(`
-            SELECT m.*, tA.name as team_a_name, tB.name as team_b_name 
-            FROM Matches m 
-            LEFT JOIN Teams tA ON m.team_a_id = tA.team_id 
-            LEFT JOIN Teams tB ON m.team_b_id = tB.team_id 
-            WHERE m.team_a_id = ? OR m.team_b_id = ?
-        `, [teamId, teamId]);
+        if (teamRows.length === 0) return res.status(404).json({ error: 'Team not found' });
+        
+        const [players] = await db.execute(`
+            SELECT p.riot_id 
+            FROM Team_Rosters tr 
+            JOIN Players p ON tr.player_id = p.player_id 
+            WHERE tr.team_id = ?
+        `, [teamId]);
 
-        let wins = 0;
-        let losses = 0;
-        matches.forEach(m => {
-            if (m.winner_id === parseInt(teamId)) wins++;
-            else if (m.winner_id !== null) losses++;
+        const allPlayers = players.map(p => p.riot_id);
+        const captain = teamRows[0].captain || 'Not Listed';
+        const members = allPlayers.filter(name => name !== captain);
+
+        res.status(200).json({
+            team_name: teamRows[0].team_name,
+            captain: captain,
+            members: members,
+            subs: []
         });
-
-        res.status(200).json({ team: teamRows[0], roster: players, stats: { wins, losses }, matches });
     } catch (error) {
+        console.error('Roster error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -458,7 +464,6 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
                 }
             }
         } else {
-            // Final match completed: mark tournament status as COMPLETED
             await connection.execute('UPDATE Tournaments SET status = ? WHERE tournament_id = ?', ['COMPLETED', tournamentId]);
         }
 
@@ -473,11 +478,12 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
 });
 
 // ==========================================
-// VERCEL ANGULAR FRONTEND SERVING (With Anti-Cache Control)
+// VERCEL ANGULAR FRONTEND SERVING
 // ==========================================
 const possibleFrontendPaths = [
     path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser'),
     path.join(__dirname, 'dist/esports-frontend/browser'),
+    path.join(__dirname, 'esports-frontend/dist/browser'),
     path.join(__dirname, 'esports-frontend/dist'),
     path.join(__dirname, 'dist')
 ];

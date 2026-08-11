@@ -51,7 +51,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Grab the /tournament/:id from the URL
     this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
       if (id) {
@@ -59,7 +58,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Start polling for live match updates
     this.pollSub = timer(4000, 4000).subscribe(() => {
       if (!this.isManualBracketMode && this.activeTournament) {
         this.pollActiveTournamentMatchesQuietly();
@@ -160,7 +158,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
   goBack() { this.router.navigate(['/dashboard']); }
 
-  // --- ADMIN BRACKET CONTROLS ---
   generateBracket() {
     this.http.post(`/api/tournaments/${this.activeTournament.tournament_id}/generate-bracket`, {}, this.api.getAuthHeaders()).subscribe({
       next: () => { 
@@ -245,7 +242,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- USER REGISTRATION ---
   openRegistration() { this.showRegistrationModal = true; }
   closeRegistration() { this.showRegistrationModal = false; this.submittedAttempt = false; }
 
@@ -284,61 +280,28 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- TEAM ROSTER MODAL ---
   openTeamModal(team: any) {
-    let parsedMembers = [];
-    let parsedSubs = [];
-    
-    try { 
-      parsedMembers = typeof team.members === 'string' ? JSON.parse(team.members) : (team.members || []); 
-    } catch(e) { parsedMembers = []; }
-
-    try { 
-      parsedSubs = typeof team.subs === 'string' ? JSON.parse(team.subs) : (team.subs || []); 
-    } catch(e) { parsedSubs = []; }
-
     this.selectedTeamRoster = {
-      team_name: team.team_name || team.name || 'Unnamed Team',
-      captain: team.captain || 'Not Listed',
-      members: parsedMembers,
-      subs: parsedSubs
+      team_name: team.team_name || team.name || 'Team Roster',
+      captain: team.captain || team.captain_riot_id || 'Loading...',
+      members: [],
+      subs: []
     };
     this.cdr.detectChanges();
-  }
 
-  closeTeamModal() { 
-    this.selectedTeamRoster = null; 
-  }
-
-    // 2. Fetch the deep data
     this.http.get<any>(`/api/teams/${team.team_id}/roster`).subscribe({
       next: (data) => {
-        // 3. Aggressively unwrap the backend response, no matter how it is nested
-        let teamData = data;
-        if (data && data.data) teamData = data.data;
-        else if (data && data.roster) teamData = data.roster;
-        
-        if (Array.isArray(teamData)) teamData = teamData[0];
-
-        // 4. Safely apply the data if found
-        if (teamData) {
-          let parsedMembers = [];
-          let parsedSubs = [];
-          
-          try { parsedMembers = typeof teamData.members === 'string' ? JSON.parse(teamData.members) : (teamData.members || []); } catch(e) {}
-          try { parsedSubs = typeof teamData.subs === 'string' ? JSON.parse(teamData.subs) : (teamData.subs || []); } catch(e) {}
-
+        if (data) {
           this.selectedTeamRoster = {
-            team_name: teamData.team_name || teamData.name || this.selectedTeamRoster.team_name,
-            captain: teamData.captain || team.captain || 'No Captain Listed',
-            members: parsedMembers,
-            subs: parsedSubs
+            team_name: data.team_name || team.team_name || team.name || 'Team Roster',
+            captain: data.captain || team.captain || 'Not Listed',
+            members: data.members || [],
+            subs: data.subs || []
           };
         }
         this.cdr.detectChanges();
       },
       error: () => {
-        this.selectedTeamRoster.captain = 'Error loading roster data';
         this.cdr.detectChanges();
       }
     });
