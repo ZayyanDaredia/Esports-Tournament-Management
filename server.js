@@ -164,35 +164,29 @@ app.post('/api/tournaments/:id/generate-bracket', verifyAdmin, async (req, res) 
         }
 
         const numRounds = Math.log2(bracketSize);
-        let matchesByRound = [];
+        let roundMatchIds = {};
 
-        for (let r = 1; r <= numRounds; r++) {
-            const matchCount = bracketSize / Math.pow(2, r);
-            matchesByRound.push({ round: r, matches: Array(matchCount).fill(null) });
-        }
-
+        // Generate rounds from Finals down to Round 1 so next_match_id links correctly
         for (let r = numRounds; r >= 1; r--) {
-            const roundIndex = r - 1;
-            const matchCount = matchesByRound[roundIndex].matches.length;
-            const createdMatchIds = [];
+            const matchCount = bracketSize / Math.pow(2, r);
+            roundMatchIds[r] = [];
 
             for (let i = 0; i < matchCount; i++) {
                 let nextMatchId = null;
-                if (r > 1) {
+                if (r < numRounds) {
                     const parentMatchIndex = Math.floor(i / 2);
-                    nextMatchId = matchesByRound[roundIndex - 1].matches[parentMatchIndex];
+                    nextMatchId = roundMatchIds[r + 1][parentMatchIndex];
                 }
 
                 const [mRes] = await connection.execute(
                     'INSERT INTO Matches (tournament_id, round_number, next_match_id, score_a, score_b) VALUES (?, ?, ?, 0, 0)',
                     [tournamentId, r, nextMatchId]
                 );
-                createdMatchIds.push(mRes.insertId);
+                roundMatchIds[r].push(mRes.insertId);
             }
-            matchesByRound[roundIndex].matches = createdMatchIds;
         }
 
-        const round1Matches = matchesByRound[0].matches;
+        const round1Matches = roundMatchIds[1];
         for (let i = 0; i < round1Matches.length; i++) {
             const teamA = shuffledTeams[i * 2] ? shuffledTeams[i * 2].team_id : null;
             const teamB = shuffledTeams[i * 2 + 1] ? shuffledTeams[i * 2 + 1].team_id : null;
