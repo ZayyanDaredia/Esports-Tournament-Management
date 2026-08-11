@@ -212,13 +212,19 @@
       <button (click)="closeTeamModal()" style="position: absolute; top: 25px; right: 25px; background: transparent; border: none; color: #64748b; font-size: 24px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.color='#f43f5e'" onmouseout="this.style.color='#64748b'">×</button>
       
       <h2 style="margin: 0 0 25px 0; color: #fff; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-        🛡️ {{ selectedTeamRoster.team_name || selectedTeamRoster.name || 'Team Roster' }}
+        🛡️ {{ selectedTeamRoster.team_name }}
       </h2>
 
-      <div style="background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px;">
+      <!-- Loading State Spinner / Text -->
+      <div *ngIf="selectedTeamRoster.loading" style="text-align: center; padding: 40px 0; color: #94a3b8; font-weight: 600; font-size: 15px;">
+        Loading full roster...
+      </div>
+
+      <!-- Loaded Content (Displays all players together) -->
+      <div *ngIf="!selectedTeamRoster.loading" style="background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 15px;">
           <span style="color: #fbbf24; font-weight: 700; font-size: 14px;">Captain</span>
-          <span style="color: #fff; font-weight: 600; font-size: 15px;">{{ selectedTeamRoster.captain || 'Not Listed' }}</span>
+          <span style="color: #fff; font-weight: 600; font-size: 15px;">{{ selectedTeamRoster.captain }}</span>
         </div>
 
         <div *ngFor="let member of selectedTeamRoster.members" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.02);">

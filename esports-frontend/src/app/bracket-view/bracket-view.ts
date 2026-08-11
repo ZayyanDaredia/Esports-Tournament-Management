@@ -280,15 +280,19 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  // --- TEAM ROSTER MODAL ---
   openTeamModal(team: any) {
+    // Set initial state to loading so partial data isn't flashed
     this.selectedTeamRoster = {
       team_name: team.team_name || team.name || 'Team Roster',
-      captain: team.captain || team.captain_riot_id || 'Loading...',
+      captain: '',
       members: [],
-      subs: []
+      subs: [],
+      loading: true
     };
     this.cdr.detectChanges();
 
+    // Fetch the complete roster data from the server
     this.http.get<any>(`/api/teams/${team.team_id}/roster`).subscribe({
       next: (data) => {
         if (data) {
@@ -296,12 +300,21 @@ export class BracketViewComponent implements OnInit, OnDestroy {
             team_name: data.team_name || team.team_name || team.name || 'Team Roster',
             captain: data.captain || team.captain || 'Not Listed',
             members: data.members || [],
-            subs: data.subs || []
+            subs: data.subs || [],
+            loading: false
           };
         }
         this.cdr.detectChanges();
       },
       error: () => {
+        // Fallback if request fails
+        this.selectedTeamRoster = {
+          team_name: team.team_name || team.name || 'Team Roster',
+          captain: team.captain || team.captain_riot_id || 'Not Listed',
+          members: [],
+          subs: [],
+          loading: false
+        };
         this.cdr.detectChanges();
       }
     });
