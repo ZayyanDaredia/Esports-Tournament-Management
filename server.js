@@ -442,9 +442,9 @@ app.get('/api/tournaments/:id/matches', async (req, res) => {
 
 app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
     const matchId = req.params.id;
-    const { score_a, score_b, winner_id } = req.body;
+    let { score_a, score_b, winner_id } = req.body;
 
-    if (score_a === undefined || score_b === undefined || !winner_id) return res.status(400).json({ error: 'Scores and winner required' });
+    if (score_a === undefined || score_b === undefined) return res.status(400).json({ error: 'Scores required' });
 
     const connection = await db.getConnection();
     try {
@@ -458,6 +458,16 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         const currentMatch = matchRows[0];
         const tournamentId = currentMatch.tournament_id;
         const nextMatchId = currentMatch.next_match_id;
+
+        // Automatically assign winner if it's a BYE match (team_b_id is null)
+        if (!currentMatch.team_b_id) {
+            winner_id = currentMatch.team_a_id;
+        }
+
+        if (!winner_id) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Winner required' });
+        }
 
         const isValidParticipant = (winner_id === currentMatch.team_a_id) || (winner_id === currentMatch.team_b_id);
         if (!isValidParticipant) {
@@ -485,6 +495,7 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
         res.status(200).json({ message: 'Score updated and winner advanced!' });
     } catch (error) {
         await connection.rollback();
+        console.error('Match update error:', error);
         res.status(500).json({ error: 'Internal server error' });
     } finally {
         connection.release();
