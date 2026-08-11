@@ -219,8 +219,9 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   enableEditScore(match: any) { 
-    if (!match.team_a_id) {
-      this.api.showToast('Cannot edit score until team is determined.', 'error');
+    const isReady = (match.team_a_id && match.team_b_id) || (match.round_number === 1 && match.team_a_id);
+    if (!isReady) {
+      this.api.showToast('Cannot edit score until both teams are present.', 'error');
       return;
     }
     match.isEditing = true; 
