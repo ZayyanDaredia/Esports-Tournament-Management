@@ -285,31 +285,53 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   // --- TEAM ROSTER MODAL ---
-  openTeamModal(teamId: number) {
-    this.http.get<any>(`/api/teams/${teamId}/roster`).subscribe({
-      next: (data) => { 
-        // 1. If the database wrapped the response in an array, extract the first item
-        let teamData = Array.isArray(data) ? data[0] : data;
+  openTeamModal(team: any) {
+    // 1. Immediately show known data so the modal is never completely blank
+    this.selectedTeamRoster = {
+      team_name: team.team_name || team.name || 'Unknown Team',
+      captain: team.captain || 'Loading roster data...',
+      members: [],
+      subs: []
+    };
+    this.cdr.detectChanges();
+
+    // 2. Fetch the deep data
+    this.http.get<any>(`/api/teams/${team.team_id}/roster`).subscribe({
+      next: (data) => {
+        // 3. Aggressively unwrap the backend response, no matter how it is nested
+        let teamData = data;
+        if (data && data.data) teamData = data.data;
+        else if (data && data.roster) teamData = data.roster;
         
+        if (Array.isArray(teamData)) teamData = teamData[0];
+
+        // 4. Safely apply the data if found
         if (teamData) {
-          // 2. If the database returned the members/subs arrays as JSON strings, parse them back into actual arrays
-          if (typeof teamData.members === 'string') {
-            try { teamData.members = JSON.parse(teamData.members); } catch(e) { teamData.members = []; }
-          }
-          if (typeof teamData.subs === 'string') {
-            try { teamData.subs = JSON.parse(teamData.subs); } catch(e) { teamData.subs = []; }
-          }
-          this.selectedTeamRoster = teamData;
+          let parsedMembers = [];
+          let parsedSubs = [];
+          
+          try { parsedMembers = typeof teamData.members === 'string' ? JSON.parse(teamData.members) : (teamData.members || []); } catch(e) {}
+          try { parsedSubs = typeof teamData.subs === 'string' ? JSON.parse(teamData.subs) : (teamData.subs || []); } catch(e) {}
+
+          this.selectedTeamRoster = {
+            team_name: teamData.team_name || teamData.name || this.selectedTeamRoster.team_name,
+            captain: teamData.captain || team.captain || 'No Captain Listed',
+            members: parsedMembers,
+            subs: parsedSubs
+          };
         }
-        
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.api.showToast('Failed to load team roster', 'error');
+        this.selectedTeamRoster.captain = 'Error loading roster data';
+        this.cdr.detectChanges();
       }
     });
   }
-  closeTeamModal() { this.selectedTeamRoster = null; }
+
+  closeTeamModal() { 
+    this.selectedTeamRoster = null; 
+  }
 
   trackByTeam(index: number, item: any) { return item.team_id; }
   trackByRound(index: number, item: any) { return item.roundNumber; }
