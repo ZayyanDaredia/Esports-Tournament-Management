@@ -1,13 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "cd esports-frontend && npm install && npm run build",
+  "buildCommand": "cd esports-frontend && npm install && npm run build && cd .. && mkdir -p dist && cp -r esports-frontend/dist/esports-frontend/browser/* dist/",
   "builds": [
     {
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
-          "esports-frontend/dist/**",
           "dist/**"
         ]
       }

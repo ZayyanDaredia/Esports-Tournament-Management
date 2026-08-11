@@ -478,25 +478,14 @@ app.put('/api/matches/:id', verifyAdmin, async (req, res) => {
 });
 
 // ==========================================
-// VERCEL ANGULAR FRONTEND SERVING (With Dynamic Path Resolution)
+// VERCEL ANGULAR FRONTEND SERVING
 // ==========================================
 const possibleFrontendPaths = [
-    path.join(__dirname, 'esports-frontend/dist/esports-frontend/browser'),
-    path.join(__dirname, 'dist/esports-frontend/browser'),
-    path.join(__dirname, 'esports-frontend/dist/browser'),
-    path.join(__dirname, 'esports-frontend/dist'),
     path.join(__dirname, 'dist'),
-    path.join(process.cwd(), 'esports-frontend/dist/esports-frontend/browser'),
-    path.join(process.cwd(), 'dist/esports-frontend/browser'),
-    path.join(process.cwd(), 'esports-frontend/dist')
+    path.join(process.cwd(), 'dist')
 ];
 
-let frontendPath = possibleFrontendPaths.find(p => fs.existsSync(path.join(p, 'index.html')));
-
-if (!frontendPath) {
-    console.warn("WARNING: index.html not found in standard paths. Falling back to default.");
-    frontendPath = possibleFrontendPaths[0];
-}
+const frontendPath = possibleFrontendPaths.find(p => fs.existsSync(path.join(p, 'index.html'))) || possibleFrontendPaths[0];
 
 app.use(express.static(frontendPath, {
     setHeaders: (res, filePath) => {
@@ -513,8 +502,7 @@ app.use((req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error(`Failed to serve index.html from: ${indexPath}`, err);
-            res.status(404).send(`Error: Angular frontend not found at path configuration. Target: ${indexPath}`);
+            res.status(404).send(`Error: Angular frontend not found at ${indexPath}`);
         }
     });
 });
