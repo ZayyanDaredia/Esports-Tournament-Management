@@ -55,6 +55,7 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
     this.pollSub = timer(4000, 4000).subscribe(() => {
       if (this.tournamentId) {
+        this.loadTournamentDetailsQuietly();
         this.loadBracketQuietly();
         this.loadTeamsQuietly();
       }
@@ -68,6 +69,15 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   loadTournamentDetails() {
+    this.http.get<any>(`/api/tournaments/${this.tournamentId}`).subscribe({
+      next: (data) => {
+        this.activeTournament = data;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadTournamentDetailsQuietly() {
     this.http.get<any>(`/api/tournaments/${this.tournamentId}`).subscribe({
       next: (data) => {
         this.activeTournament = data;
@@ -158,7 +168,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     if (match.team_a_id && match.team_b_id) return true;
     if (match.round_number === 1 && match.team_a_id) return true;
 
-    // If Team A is present but Team B is missing, check if Feeder B is finished or permanently empty
     if (match.team_a_id && !match.team_b_id) {
       if (!match.feederB) return true;
       if (match.feederB.winner_id !== null || (match.feederB.team_a_id === null && match.feederB.team_b_id === null)) {
@@ -166,7 +175,6 @@ export class BracketViewComponent implements OnInit, OnDestroy {
       }
     }
 
-    // If Team B is present but Team A is missing, check if Feeder A is finished or permanently empty
     if (match.team_b_id && !match.team_a_id) {
       if (!match.feederA) return true;
       if (match.feederA.winner_id !== null || (match.feederA.team_a_id === null && match.feederA.team_b_id === null)) {
@@ -323,7 +331,7 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
     this.http.post('/api/teams/bulk', payload, this.api.getAuthHeaders()).subscribe({
       next: () => {
-        this.showRegistrationForm = false; // Form disappears upon successful submission
+        this.showRegistrationForm = false; 
         this.loadTeams();
         this.api.showToast('Team registered successfully!', 'success');
       },
