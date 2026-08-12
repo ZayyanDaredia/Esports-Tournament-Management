@@ -99,11 +99,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   updateVisibleTournaments() {
-    if (this.api.userRole.value === 'admin') {
-      this.visibleTournaments = this.tournaments;
-    } else {
-      this.visibleTournaments = this.tournaments; 
-    }
+    this.visibleTournaments = this.tournaments;
   }
 
   get filteredTournaments() {
