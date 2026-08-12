@@ -40,6 +40,12 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   regSub2 = '';
   submittedAttempt = false;
 
+  // Custom Confirmation Modal State
+  showConfirmModal: boolean = false;
+  confirmTitle: string = '';
+  confirmMessage: string = '';
+  private confirmCallback: (() => void) | null = null;
+
   private pollSub?: Subscription;
 
   ngOnInit() {
@@ -245,18 +251,22 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   resetBracket() {
-    if (confirm('Are you sure you want to reset the bracket? All progress will be lost.')) {
-      this.http.delete(`/api/tournaments/${this.tournamentId}/bracket`, this.api.getAuthHeaders()).subscribe({
-        next: () => {
-          this.loadBracket();
-          this.loadTournamentDetails();
-          this.api.showToast('Bracket reset successfully', 'success');
-        },
-        error: (err) => {
-          this.api.showToast(err.error?.error || 'Failed to reset bracket', 'error');
-        }
-      });
-    }
+    this.triggerConfirm(
+      'Reset Bracket',
+      'Are you sure you want to reset the bracket? All progress will be lost.',
+      () => {
+        this.http.delete(`/api/tournaments/${this.tournamentId}/bracket`, this.api.getAuthHeaders()).subscribe({
+          next: () => {
+            this.loadBracket();
+            this.loadTournamentDetails();
+            this.api.showToast('Bracket reset successfully', 'success');
+          },
+          error: (err) => {
+            this.api.showToast(err.error?.error || 'Failed to reset bracket', 'error');
+          }
+        });
+      }
+    );
   }
 
   openManualBracketBuilder() {
@@ -287,17 +297,41 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   }
 
   deleteTeam(teamId: number) {
-    if (confirm('Remove this team from the tournament?')) {
-      this.http.delete(`/api/teams/${teamId}`, this.api.getAuthHeaders()).subscribe({
-        next: () => {
-          this.loadTeams();
-          this.api.showToast('Team removed successfully', 'success');
-        },
-        error: (err) => {
-          this.api.showToast(err.error?.error || 'Failed to remove team', 'error');
-        }
-      });
+    this.triggerConfirm(
+      'Remove Team',
+      'Remove this team from the tournament?',
+      () => {
+        this.http.delete(`/api/teams/${teamId}`, this.api.getAuthHeaders()).subscribe({
+          next: () => {
+            this.loadTeams();
+            this.api.showToast('Team removed successfully', 'success');
+          },
+          error: (err) => {
+            this.api.showToast(err.error?.error || 'Failed to remove team', 'error');
+          }
+        });
+      }
+    );
+  }
+
+  triggerConfirm(title: string, message: string, callback: () => void) {
+    this.confirmTitle = title;
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.showConfirmModal = true;
+  }
+
+  handleConfirmYes() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
     }
+    this.showConfirmModal = false;
+    this.confirmCallback = null;
+  }
+
+  handleConfirmNo() {
+    this.showConfirmModal = false;
+    this.confirmCallback = null;
   }
 
   toggleRegistrationForm() {

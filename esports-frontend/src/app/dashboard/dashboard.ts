@@ -30,6 +30,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLoadingTournaments: boolean = false;
   private pollSub?: Subscription;
 
+  // Custom Confirmation Modal State
+  showConfirmModal: boolean = false;
+  confirmTitle: string = '';
+  confirmMessage: string = '';
+  private confirmCallback: (() => void) | null = null;
+
   ngOnInit() {
     if (!this.api.userRole.value) {
       this.router.navigate(['/login']);
@@ -138,16 +144,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   deleteTournament(id: number, event: Event) {
     event.stopPropagation(); 
-    if (confirm('Delete this tournament completely?')) {
-      this.http.delete(`/api/tournaments/${id}`, this.api.getAuthHeaders()).subscribe({
-        next: () => {
-          this.fetchTournaments();
-          this.fetchTeams();
-          this.api.showToast('Tournament deleted successfully', 'success');
-        },
-        error: (err) => this.api.showToast(err.error?.error || 'Failed to delete', 'error')
-      });
+    this.triggerConfirm(
+      'Delete Tournament',
+      'Delete this tournament completely? All associated data and matches will be permanently removed.',
+      () => {
+        this.http.delete(`/api/tournaments/${id}`, this.api.getAuthHeaders()).subscribe({
+          next: () => {
+            this.fetchTournaments();
+            this.fetchTeams();
+            this.api.showToast('Tournament deleted successfully', 'success');
+          },
+          error: (err) => this.api.showToast(err.error?.error || 'Failed to delete', 'error')
+        });
+      }
+    );
+  }
+
+  triggerConfirm(title: string, message: string, callback: () => void) {
+    this.confirmTitle = title;
+    this.confirmMessage = message;
+    this.confirmCallback = callback;
+    this.showConfirmModal = true;
+  }
+
+  handleConfirmYes() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
     }
+    this.showConfirmModal = false;
+    this.confirmCallback = null;
+  }
+
+  handleConfirmNo() {
+    this.showConfirmModal = false;
+    this.confirmCallback = null;
   }
 
   trackByTourney(index: number, item: any) { 
