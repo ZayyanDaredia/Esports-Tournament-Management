@@ -26,7 +26,7 @@ export class BracketViewComponent implements OnInit, OnDestroy {
   
   isManualBracketMode: boolean = false;
   manualMatchups: any[] = [];
-  showRegistrationModal: boolean = false;
+  showRegistrationForm: boolean = false;
   selectedTeamRoster: any = null;
   isLoadingMatches: boolean = false;
 
@@ -292,21 +292,19 @@ export class BracketViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  openRegistration() {
-    this.showRegistrationModal = true;
+  toggleRegistrationForm() {
+    this.showRegistrationForm = !this.showRegistrationForm;
     this.submittedAttempt = false;
-    this.regTeamName = '';
-    this.regCap = '';
-    this.regP2 = '';
-    this.regP3 = '';
-    this.regP4 = '';
-    this.regP5 = '';
-    this.regSub1 = '';
-    this.regSub2 = '';
-  }
-
-  closeRegistration() {
-    this.showRegistrationModal = false;
+    if (this.showRegistrationForm) {
+      this.regTeamName = '';
+      this.regCap = '';
+      this.regP2 = '';
+      this.regP3 = '';
+      this.regP4 = '';
+      this.regP5 = '';
+      this.regSub1 = '';
+      this.regSub2 = '';
+    }
   }
 
   registerFullTeam() {
@@ -325,7 +323,7 @@ export class BracketViewComponent implements OnInit, OnDestroy {
 
     this.http.post('/api/teams/bulk', payload, this.api.getAuthHeaders()).subscribe({
       next: () => {
-        this.closeRegistration();
+        this.showRegistrationForm = false; // Form disappears upon successful submission
         this.loadTeams();
         this.api.showToast('Team registered successfully!', 'success');
       },
