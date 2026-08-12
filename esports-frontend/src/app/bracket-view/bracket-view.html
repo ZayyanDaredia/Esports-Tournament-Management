@@ -104,7 +104,7 @@
                style="background: #1c2333; border-radius: 12px; overflow: hidden; position: relative; z-index: 2;">
             
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.02);">
-              <span style="font-size: 10px; font-weight: 700; color: #64748b;">MATCH {{ match.match_id }}</span>
+              <span style="font-size: 10px; font-weight: 700; color: #64748b;">MATCH {{ match.display_match_number }}</span>
               <span [style.color]="getMatchStatus(match).color" [style.background]="getMatchStatus(match).bg" style="font-size: 9px; padding: 3px 8px; border-radius: 12px; font-weight: 800; letter-spacing: 0.5px;">{{ getMatchStatus(match).label }}</span>
             </div>
 

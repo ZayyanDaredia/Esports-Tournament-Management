@@ -485,7 +485,10 @@ app.get('/api/tournaments/:id/bracket', async (req, res) => {
             feederMap[f.next_match_id].push(f);
         });
 
+        // Assign sequential local match numbers starting at 1 per tournament
+        let counter = 1;
         matches.forEach(m => {
+            m.display_match_number = counter++;
             const incomingFeeders = feederMap[m.match_id] || [];
             m.feederA = incomingFeeders[0] || null;
             m.feederB = incomingFeeders[1] || null;
