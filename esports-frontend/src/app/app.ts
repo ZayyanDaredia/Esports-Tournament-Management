@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router } from '@angular/router';
+// 1. ADDED RouterLink TO THIS IMPORT
+import { RouterOutlet, Router, RouterLink } from '@angular/router'; 
 import { ApiService } from './api'; // Connects to the vault we made in Phase 1
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  // 2. ADDED RouterLink TO THIS ARRAY
+  imports: [CommonModule, RouterOutlet, RouterLink],
   templateUrl: './app.html'
 })
 export class App implements OnInit, OnDestroy {
