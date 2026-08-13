@@ -16,7 +16,8 @@
         <span style="width: 8px; height: 8px; background: #00d28a; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 210, 138, 0.5);"></span>
         <span style="font-size: 14px; color: #94a3b8; font-weight: 500;">{{ api.username.value }} <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">({{ api.userRole.value }})</span></span>
       </div>
-      <button (click)="api.logout()" style="background: transparent; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; background: rgba(255,255,255,0.03);">Logout</button>
+      <!-- FIXED: Calls component's logout() method which includes router navigation -->
+      <button (click)="logout()" style="background: transparent; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; background: rgba(255,255,255,0.03);">Logout</button>
     </div>
   </header>
 
