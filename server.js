@@ -103,6 +103,51 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ==========================================
+// EMAIL VERIFICATION & RECOVERY STORAGE
+// ==========================================
+const verificationCodes = {};
+
+app.post('/api/auth/send-verification', (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Generate a 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    verificationCodes[email] = code;
+
+    // Output code to console logs for testing/debugging purposes
+    console.log(`[Verification Code] Email: ${email} | Code: ${code}`);
+
+    res.status(200).json({ message: 'Verification code sent successfully!' });
+});
+
+app.post('/api/auth/verify-code', (req, res) => {
+    const { email, code } = req.body;
+    if (!email || !code) {
+        return res.status(400).json({ error: 'Email and code are required' });
+    }
+
+    if (verificationCodes[email] === code) {
+        delete verificationCodes[email]; // Clear code after successful use
+        return res.status(200).json({ message: 'Email verified successfully!' });
+    }
+
+    res.status(400).json({ error: 'Invalid or expired verification code.' });
+});
+
+app.post('/api/auth/forgot-password', (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Handle password/username recovery instruction dispatch here
+    res.status(200).json({ message: 'Recovery instructions sent to your email.' });
+});
+
+// ==========================================
 // TOURNAMENTS
 // ==========================================
 app.get('/api/tournaments', async (req, res) => {
