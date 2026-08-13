@@ -1,0 +1,52 @@
+<div style="background: #111827; border-radius: 16px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <h2 style="margin-top: 0; margin-bottom: 30px; font-size: 24px;">Your Profile</h2>
+
+    <!-- Avatar Upload Section -->
+    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: #1f2937; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 2px solid #334155;">
+            <img *ngIf="profile.profile_picture" [src]="profile.profile_picture" style="width: 100%; height: 100%; object-fit: cover;">
+            <span *ngIf="!profile.profile_picture" style="font-size: 32px; color: #64748b;">👤</span>
+        </div>
+        <div>
+            <label style="background: #38bdf8; color: #0b0f19; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s;" onmouseover="this.style.background='#7dd3fc'" onmouseout="this.style.background='#38bdf8'">
+                Change Avatar
+                <input type="file" style="display: none;" (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/webp">
+            </label>
+        </div>
+    </div>
+
+    <!-- Details Section -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div>
+            <label style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 8px;">Username (Cannot be changed)</label>
+            <input type="text" [value]="profile.username" disabled style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #64748b; font-size: 14px; box-sizing: border-box;">
+        </div>
+
+        <div>
+            <label style="display: block; font-size: 12px; color: #94a3b8; margin-bottom: 8px;">Full Name</label>
+            <input type="text" [(ngModel)]="profile.full_name" placeholder="Enter your full name" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; font-size: 14px; box-sizing: border-box;">
+        </div>
+        
+        <button (click)="saveProfileDetails()" style="background: #00d28a; color: #0b0f19; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='#00d28a'">Save Details</button>
+    </div>
+
+    <hr style="border-color: #334155; margin: 40px 0;">
+
+    <!-- Email Verification Section -->
+    <div>
+        <h3 style="margin-top: 0; font-size: 18px;">Email Address</h3>
+        <p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">
+            {{ profile.email ? 'Current Email: ' + profile.email : 'No email linked to this account.' }}
+        </p>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="email" [(ngModel)]="newEmail" placeholder="New Email Address" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; font-size: 14px; box-sizing: border-box;">
+            <button (click)="requestEmailChange()" style="background: #38bdf8; color: #0b0f19; padding: 0 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#7dd3fc'" onmouseout="this.style.background='#38bdf8'">Send Code</button>
+        </div>
+
+        <div *ngIf="showEmailCodeInput" style="display: flex; gap: 10px; animation: fadeIn 0.3s ease;">
+            <input type="text" [(ngModel)]="emailCode" placeholder="Enter 6-digit code" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #f8fafc; font-size: 14px; box-sizing: border-box;">
+            <button (click)="verifyEmailChange()" style="background: #00d28a; color: #0b0f19; padding: 0 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#10b981'" onmouseout="this.style.background='#00d28a'">Verify & Save</button>
+        </div>
+    </div>
+</div>

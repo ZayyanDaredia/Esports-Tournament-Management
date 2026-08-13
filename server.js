@@ -115,6 +115,54 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ==========================================
+// USER PROFILE
+// ==========================================
+app.get('/api/profile', verifyToken, async (req, res) => {
+    try {
+        const [users] = await db.execute(
+            'SELECT id, username, email, full_name, profile_picture, role FROM Users WHERE id = ?', 
+            [req.user.id]
+        );
+        if (users.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.status(200).json(users[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch profile' });
+    }
+});
+
+app.put('/api/profile', verifyToken, async (req, res) => {
+    const { full_name, profile_picture } = req.body;
+    try {
+        await db.execute(
+            'UPDATE Users SET full_name = ?, profile_picture = ? WHERE id = ?', 
+            [full_name || null, profile_picture || null, req.user.id]
+        );
+        res.status(200).json({ message: 'Profile updated successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+app.post('/api/profile/verify-email-change', verifyToken, async (req, res) => {
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
+
+    if (verificationCodes[email] === code) {
+        try {
+            await db.execute('UPDATE Users SET email = ? WHERE id = ?', [email, req.user.id]);
+            delete verificationCodes[email]; // Clear code after use
+            return res.status(200).json({ message: 'Email updated and verified successfully!' });
+        } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ error: 'Email already in use by another account.' });
+            }
+            return res.status(500).json({ error: 'Failed to update email in database.' });
+        }
+    }
+    res.status(400).json({ error: 'Invalid or expired verification code.' });
+});
+
+// ==========================================
 // EMAIL VERIFICATION & RECOVERY STORAGE
 // ==========================================
 const verificationCodes = {};
@@ -682,3 +730,10 @@ app.use((req, res) => {
 });
 
 module.exports = app;
+
+const localPort = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(localPort, () => {
+    console.log(`🚀 Server is running locally on http://localhost:${localPort}`);
+  });
+}

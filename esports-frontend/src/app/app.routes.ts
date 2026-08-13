@@ -3,6 +3,7 @@ import { AuthComponent } from './auth/auth';
 import { DashboardComponent } from './dashboard/dashboard';
 import { CreateTournamentComponent } from './create-tournament/create-tournament';
 import { BracketViewComponent } from './bracket-view/bracket-view';
+import { ProfileComponent } from './profile/profile';
 
 export const routes: Routes = [
   // If the user goes to the base URL, send them to login
@@ -12,6 +13,9 @@ export const routes: Routes = [
   { path: 'login', component: AuthComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'create-tournament', component: CreateTournamentComponent },
+  
+  // The new Profile room
+  { path: 'profile', component: ProfileComponent }, // <-- ADDED THIS ROUTE
   
   // The :id creates a dynamic URL like /tournament/5
   { path: 'tournament/:id', component: BracketViewComponent },
