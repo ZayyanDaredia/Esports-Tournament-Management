@@ -47,7 +47,7 @@ export class AuthComponent implements OnInit {
     }
   }
 
-  // Ensures state switches cleanly and fixes the login button navigation behavior
+  // Forces state change and immediately updates the view to prevent disappearing button bugs
   setAuthMode(mode: 'login' | 'signup' | 'forgot') {
     this.authMode = mode;
     this.submittedAttempt = false;
@@ -130,9 +130,8 @@ export class AuthComponent implements OnInit {
 
     this.http.post('/api/signup', payload).subscribe({
       next: () => { 
-        this.authMode = 'login'; 
+        this.setAuthMode('login'); 
         this.api.showToast('Account created successfully! Please log in.', 'success');
-        this.cdr.detectChanges();
       },
       error: (err) => this.api.showToast(err.error?.error || 'Signup failed', 'error')
     });

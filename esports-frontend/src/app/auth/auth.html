@@ -14,19 +14,19 @@
       <div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <label style="color: #94a3b8; font-size: 13px; font-weight: 600;">Password</label>
-          <a (click)="setAuthMode('forgot')" style="color: #38bdf8; font-size: 12px; font-weight: 600; cursor: pointer;">Forgot Password?</a>
+          <a role="button" (click)="setAuthMode('forgot')" style="color: #38bdf8; font-size: 12px; font-weight: 600; cursor: pointer;">Forgot Password?</a>
         </div>
         <input type="password" [(ngModel)]="loginPass" (keyup.enter)="login()" placeholder="Enter your password" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none; box-sizing: border-box;">
       </div>
     </div>
 
-    <button (click)="login()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);">
+    <button type="button" (click)="login()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);">
       Sign In
     </button>
 
     <div style="text-align: center; margin-top: 20px;">
       <span style="color: #94a3b8; font-size: 14px;">Don't have an account? </span>
-      <a (click)="setAuthMode('signup')" style="color: #38bdf8; font-weight: 600; cursor: pointer; font-size: 14px;">Create account</a>
+      <a role="button" (click)="setAuthMode('signup')" style="color: #38bdf8; font-weight: 600; cursor: pointer; font-size: 14px;">Create account</a>
     </div>
   </div>
 
@@ -50,7 +50,7 @@
         <label style="display: block; color: #94a3b8; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Email Address</label>
         <div style="display: flex; gap: 10px;">
           <input type="email" [(ngModel)]="signupEmail" [disabled]="isEmailVerified" placeholder="name@example.com" style="flex: 1; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none; box-sizing: border-box;">
-          <button (click)="sendVerificationCode()" [disabled]="isEmailVerified || isVerifying" style="background: #38bdf8; color: #0b0f19; border: none; padding: 0 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; white-space: nowrap;">
+          <button type="button" (click)="sendVerificationCode()" [disabled]="isEmailVerified || isVerifying" style="background: #38bdf8; color: #0b0f19; border: none; padding: 0 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; white-space: nowrap;">
             {{ isEmailVerified ? 'Verified ✓' : (isVerifying ? 'Sending...' : 'Verify') }}
           </button>
         </div>
@@ -62,7 +62,7 @@
         <label style="display: block; color: #94a3b8; font-size: 13px; font-weight: 600; margin-bottom: 6px;">Enter Verification Code</label>
         <div style="display: flex; gap: 10px;">
           <input type="text" [(ngModel)]="verificationCode" placeholder="Enter code received" style="flex: 1; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none; box-sizing: border-box;">
-          <button (click)="verifyCode()" style="background: #10b981; color: #fff; border: none; padding: 0 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px;">Confirm</button>
+          <button type="button" (click)="verifyCode()" style="background: #10b981; color: #fff; border: none; padding: 0 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px;">Confirm</button>
         </div>
       </div>
 
@@ -82,13 +82,13 @@
 
     </div>
 
-    <button (click)="signup()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);">
+    <button type="button" (click)="signup()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 25px; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);">
       Complete Registration
     </button>
 
     <div style="text-align: center; margin-top: 20px;">
       <span style="color: #94a3b8; font-size: 14px;">Already have an account? </span>
-      <a (click)="setAuthMode('login')" style="color: #38bdf8; font-weight: 600; cursor: pointer; font-size: 14px;">Sign in</a>
+      <a role="button" (click)="setAuthMode('login')" style="color: #38bdf8; font-weight: 600; cursor: pointer; font-size: 14px;">Sign in</a>
     </div>
   </div>
 
@@ -104,7 +104,7 @@
       <input type="email" [(ngModel)]="forgotEmail" placeholder="name@example.com" style="width: 100%; padding: 14px 18px; background: #1c2333; border: 1px solid transparent; color: #fff; border-radius: 12px; outline: none; box-sizing: border-box;">
     </div>
 
-    <button *ngIf="!forgotSubmitted" (click)="requestRecovery()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25);">
+    <button type="button" *ngIf="!forgotSubmitted" (click)="requestRecovery()" style="width: 100%; background: #38bdf8; color: #0b0f19; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.25);">
       Send Recovery Link
     </button>
 
@@ -113,7 +113,7 @@
     </div>
 
     <div style="margin-top: 25px;">
-      <a (click)="setAuthMode('login')" style="color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline;">← Back to Sign In</a>
+      <a role="button" (click)="setAuthMode('login')" style="color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline;">← Back to Sign In</a>
     </div>
   </div>
 
