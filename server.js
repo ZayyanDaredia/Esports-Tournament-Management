@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 const db = require('./db');
 
@@ -29,6 +30,17 @@ if (!JWT_SECRET) {
     console.error('FATAL ERROR: JWT_SECRET environment variable is missing.');
     process.exit(1);
 }
+
+// ==========================================
+// NODEMAILER TRANSPORTER CONFIGURATION
+// ==========================================
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 // ==========================================
 // MIDDLEWARE
@@ -107,7 +119,7 @@ app.post('/api/login', async (req, res) => {
 // ==========================================
 const verificationCodes = {};
 
-app.post('/api/auth/send-verification', (req, res) => {
+app.post('/api/auth/send-verification', async (req, res) => {
     const { email } = req.body;
     if (!email) {
         return res.status(400).json({ error: 'Email is required' });
@@ -117,10 +129,20 @@ app.post('/api/auth/send-verification', (req, res) => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     verificationCodes[email] = code;
 
-    // Output code to console logs for testing/debugging purposes
-    console.log(`[Verification Code] Email: ${email} | Code: ${code}`);
+    try {
+        await transporter.sendMail({
+            from: `"Esports Hub" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Your Esports Hub Verification Code',
+            text: `Hello,\n\nYour verification code for Esports Hub is: ${code}\n\nEnter this code on the registration page to verify your email address.`
+        });
 
-    res.status(200).json({ message: 'Verification code sent successfully!' });
+        console.log(`[Email Sent] Verification code sent successfully to ${email}`);
+        res.status(200).json({ message: 'Verification code sent successfully to your email!' });
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        res.status(500).json({ error: 'Failed to send verification email. Please check server configuration.' });
+    }
 });
 
 app.post('/api/auth/verify-code', (req, res) => {
