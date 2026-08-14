@@ -59,7 +59,6 @@
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <span [style.color]="t.status === 'REGISTRATION_OPEN' ? '#38bdf8' : '#10b981'" [style.background]="t.status === 'REGISTRATION_OPEN' ? 'rgba(56, 189, 248, 0.1)' : 'rgba(16, 185, 129, 0.1)'" style="font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">{{ t.status }}</span>
-              <span style="font-size: 12px; color: #64748b; font-weight: 500;">ID #{{ t.tournament_id }}</span>
             </div>
             <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
             <p style="margin: 0; font-size: 13px; font-weight: 600;" [style.color]="t.game_title === 'Valorant' ? '#ff4655' : (t.game_title === 'CS2' ? '#eab308' : '#94a3b8')">🎮 {{ t.game_title }}</p>
@@ -83,7 +82,7 @@
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <span style="font-size: 10px; background: rgba(100, 116, 139, 0.1); color: #64748b; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">COMPLETED</span>
-              <span style="font-size: 12px; color: #64748b; font-weight: 500;">ID #{{ t.tournament_id }}</span>
+              <!-- The ID number has been cleanly removed from here -->
             </div>
             <h3 style="margin: 0 0 6px 0; font-size: 18px; color: #fff; font-weight: 700;">{{ t.name }}</h3>
             <p style="margin: 0; font-size: 13px; font-weight: 600;" [style.color]="t.game_title === 'Valorant' ? '#ff4655' : '#eab308'">🎮 {{ t.game_title }}</p>
