@@ -12,15 +12,20 @@
     </h1>
     
     <div *ngIf="api.userRole.value" style="display: flex; align-items: center; gap: 20px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <!-- Online Status Indicator -->
         <span style="width: 8px; height: 8px; background: #00d28a; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 210, 138, 0.5);"></span>
         
-        <!-- NEW: Clickable Router Link for Profile -->
-        <a routerLink="/profile" style="font-size: 14px; color: #94a3b8; font-weight: 500; text-decoration: none; cursor: pointer; transition: color 0.2s ease;" onmouseover="this.style.color='#f8fafc'" onmouseout="this.style.color='#94a3b8'">
-          {{ api.username.value }} <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">({{ api.userRole.value }})</span>
+        <!-- NEW: Clickable Router Link Button for Profile -->
+        <a routerLink="/profile" 
+           style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; font-size: 14px; color: #94a3b8; font-weight: 500; text-decoration: none; cursor: pointer; background-color: rgba(148, 163, 184, 0.05); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px; transition: all 0.2s ease-in-out;" 
+           onmouseover="this.style.backgroundColor='rgba(56, 189, 248, 0.1)'; this.style.color='#f0f9ff'; this.style.borderColor='rgba(56, 189, 248, 0.5)'" 
+           onmouseout="this.style.backgroundColor='rgba(148, 163, 184, 0.05)'; this.style.color='#94a3b8'; this.style.borderColor='rgba(148, 163, 184, 0.2)'">
+          <span style="font-weight: 600;">{{ api.username.value }}</span> 
+          <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">({{ api.userRole.value }})</span>
         </a>
       </div>
-      <!-- FIXED: Calls component's logout() method which includes router navigation -->
+      <!-- Calls component's logout() method which includes router navigation -->
       <button (click)="logout()" style="background: transparent; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; background: rgba(255,255,255,0.03);">Logout</button>
     </div>
   </header>
