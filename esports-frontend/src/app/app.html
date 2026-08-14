@@ -16,13 +16,15 @@
         <!-- Online Status Indicator -->
         <span style="width: 8px; height: 8px; background: #00d28a; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 210, 138, 0.5);"></span>
         
-        <!-- NEW: Clickable Router Link Button for Profile -->
+        <!-- Clickable Router Link Button for Profile -->
         <a routerLink="/profile" 
            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; font-size: 14px; color: #94a3b8; font-weight: 500; text-decoration: none; cursor: pointer; background-color: rgba(148, 163, 184, 0.05); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px; transition: all 0.2s ease-in-out;" 
            onmouseover="this.style.backgroundColor='rgba(56, 189, 248, 0.1)'; this.style.color='#f0f9ff'; this.style.borderColor='rgba(56, 189, 248, 0.5)'" 
            onmouseout="this.style.backgroundColor='rgba(148, 163, 184, 0.05)'; this.style.color='#94a3b8'; this.style.borderColor='rgba(148, 163, 184, 0.2)'">
           <span style="font-weight: 600;">{{ api.username.value }}</span> 
-          <span style="color: #64748b; font-size: 12px; text-transform: uppercase;">({{ api.userRole.value }})</span>
+          
+          <!-- FIXED: Now this tag only appears if the user is an admin -->
+          <span *ngIf="api.userRole.value === 'admin'" style="color: #64748b; font-size: 12px; text-transform: uppercase;">(ADMIN)</span>
         </a>
       </div>
       <!-- Calls component's logout() method which includes router navigation -->
